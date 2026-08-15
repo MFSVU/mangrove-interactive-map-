@@ -29,28 +29,28 @@ var NDVI_PALETTE = {
     ]
 };
 
-// Data file paths - UPDATED for your files
+// Data file paths - USE ORIGINAL GEE EXPORT NAMES
 var DATA_PATHS = {
-    aois: 'data/aois.geojson',
+    aois: 'data/AOI_001_geojson.geojson',  // ← Original GEE export
     mangroveMasks: {
-        2016: 'data/mangrove_masks/mask_2016.tif',
-        2019: 'data/mangrove_masks/mask_2019.tif',
-        2022: 'data/mangrove_masks/mask_2022.tif',
-        2025: 'data/mangrove_masks/mask_2025.tif'
+        2016: 'data/mangrove_masks/AOI_001_mask_2016.tif',
+        2019: 'data/mangrove_masks/AOI_001_mask_2019.tif',
+        2022: 'data/mangrove_masks/AOI_001_mask_2022.tif',
+        2025: 'data/mangrove_masks/AOI_001_mask_2025.tif'
     },
     ndviRasters: {
-        2016: 'data/ndvi_rasters/ndvi_2016.tif',
-        2019: 'data/ndvi_rasters/ndvi_2019.tif',
-        2022: 'data/ndvi_rasters/ndvi_2022.tif',
-        2025: 'data/ndvi_rasters/ndvi_2025.tif'
+        2016: 'data/ndvi_rasters/AOI_001_ndvi_2016.tif',
+        2019: 'data/ndvi_rasters/AOI_001_ndvi_2019.tif',
+        2022: 'data/ndvi_rasters/AOI_001_ndvi_2022.tif',
+        2025: 'data/ndvi_rasters/AOI_001_ndvi_2025.tif'
     }
 };
 
 // AOI styling
 var AOI_STYLE = {
     color: '#FF4444',
-    weight: 2,
-    opacity: 0.8,
+    weight: 3,
+    opacity: 0.9,
     fillColor: '#FF4444',
     fillOpacity: 0.1
 };
