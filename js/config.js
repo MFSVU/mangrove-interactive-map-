@@ -29,20 +29,20 @@ var NDVI_PALETTE = {
     ]
 };
 
-// Data file paths - USE ORIGINAL GEE EXPORT NAMES
+// Data file paths - use PNG for simplicity (convert from TIFF)
 var DATA_PATHS = {
-    aois: 'data/AOI_001_geojson.geojson',  // ← Original GEE export
+    aois: 'data/AOI_001_geojson.geojson',
     mangroveMasks: {
-        2016: 'data/mangrove_masks/AOI_001_mask_2016.tif',
-        2019: 'data/mangrove_masks/AOI_001_mask_2019.tif',
-        2022: 'data/mangrove_masks/AOI_001_mask_2022.tif',
-        2025: 'data/mangrove_masks/AOI_001_mask_2025.tif'
+        2016: 'data/mangrove_masks/AOI_001_mask_2016.png',
+        2019: 'data/mangrove_masks/AOI_001_mask_2019.png',
+        2022: 'data/mangrove_masks/AOI_001_mask_2022.png',
+        2025: 'data/mangrove_masks/AOI_001_mask_2025.png'
     },
     ndviRasters: {
-        2016: 'data/ndvi_rasters/AOI_001_ndvi_2016.tif',
-        2019: 'data/ndvi_rasters/AOI_001_ndvi_2019.tif',
-        2022: 'data/ndvi_rasters/AOI_001_ndvi_2022.tif',
-        2025: 'data/ndvi_rasters/AOI_001_ndvi_2025.tif'
+        2016: 'data/ndvi_rasters/AOI_001_ndvi_2016.png',
+        2019: 'data/ndvi_rasters/AOI_001_ndvi_2019.png',
+        2022: 'data/ndvi_rasters/AOI_001_ndvi_2022.png',
+        2025: 'data/ndvi_rasters/AOI_001_ndvi_2025.png'
     }
 };
 
