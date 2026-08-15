@@ -4,7 +4,7 @@
 
 // Initialize the map
 var map = L.map('map', {
-    center: [26.0, 34.5],  // Will be updated when AOI loads
+    center: [26.0, 34.5],
     zoom: 10,
     zoomControl: true
 });
@@ -25,18 +25,45 @@ var overlayGroups = {
     ndvi: L.layerGroup()
 };
 
+// Create separate layer groups for each year
+var yearGroups = {};
+YEARS.forEach(function(year) {
+    yearGroups['ndvi_' + year] = L.layerGroup();
+    yearGroups['mask_' + year] = L.layerGroup();
+});
+
+// Add all layer groups to map
+Object.keys(yearGroups).forEach(function(key) {
+    yearGroups[key].addTo(map);
+});
+
+// ============================================
+// LAYER CONTROL WITH SEPARATE YEAR BUTTONS
+// ============================================
+
+var overlayLayers = {
+    'AOI Boundary': overlayGroups.aois
+};
+
+// Add NDVI layers for each year
+YEARS.forEach(function(year) {
+    overlayLayers['NDVI ' + year] = yearGroups['ndvi_' + year];
+});
+
+// Add Mangrove Mask layers for each year
+YEARS.forEach(function(year) {
+    overlayLayers['Mangrove Mask ' + year] = yearGroups['mask_' + year];
+});
+
 // Add layer control
-var layerControl = L.control.layers(baseLayers, {
-    'AOI Boundary': overlayGroups.aois,
-    'Mangrove Masks': overlayGroups.masks,
-    'NDVI Rasters': overlayGroups.ndvi
-}, {
+var layerControl = L.control.layers(baseLayers, overlayLayers, {
     collapsed: false,
     position: 'topright'
 }).addTo(map);
 
 // Store layer groups for access in layers.js
 var LAYER_GROUPS = overlayGroups;
+var YEAR_GROUPS = yearGroups;
 
 // Log ready message
 console.log('🌿 Mangrove Interactive Map loaded successfully!');
