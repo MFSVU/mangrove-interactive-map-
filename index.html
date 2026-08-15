@@ -7,7 +7,8 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet COG Plugin CSS -->
+    
+    <!-- Leaflet COG Plugin CSS (if needed) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-cog@0.3.3/dist/leaflet-cog.min.css">
     
     <link rel="stylesheet" href="css/style.css">
@@ -29,10 +30,19 @@
         <div><span style="background:#FF4444; opacity:0.1; border:2px solid #FF4444;"></span> AOI Boundary</div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- ============================================ -->
+    <!-- LEAFET AND PLUGINS - MUST LOAD IN ORDER -->
+    <!-- ============================================ -->
+    
+    <!-- 1. Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet COG Plugin -->
+    
+    <!-- 2. Leaflet COG Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet-cog@0.3.3/dist/leaflet-cog.min.js"></script>
+    
+    <!-- ============================================ -->
+    <!-- YOUR APPLICATION SCRIPTS -->
+    <!-- ============================================ -->
     
     <script src="js/config.js"></script>
     <script src="js/layers.js"></script>
