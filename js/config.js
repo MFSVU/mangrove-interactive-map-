@@ -29,7 +29,7 @@ var NDVI_PALETTE = {
     ]
 };
 
-// Data file paths
+// Data file paths - UPDATED for your files
 var DATA_PATHS = {
     aois: 'data/aois.geojson',
     mangroveMasks: {
@@ -53,13 +53,4 @@ var AOI_STYLE = {
     opacity: 0.8,
     fillColor: '#FF4444',
     fillOpacity: 0.1
-};
-
-// Mangrove mask styling
-var MASK_STYLE = {
-    color: '#00FF00',
-    weight: 1,
-    opacity: 0.9,
-    fillColor: '#00FF00',
-    fillOpacity: 0.4
 };
