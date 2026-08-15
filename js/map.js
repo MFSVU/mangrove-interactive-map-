@@ -2,10 +2,10 @@
 // MAIN MAP INITIALIZATION
 // ============================================
 
-// Initialize the map - UPDATE COORDINATES FOR YOUR AOI
+// Initialize the map
 var map = L.map('map', {
-    center: [26.0, 34.5],  // ← Replace with your AOI's center coordinates
-    zoom: 12,               // ← Adjust zoom level for your AOI
+    center: [26.0, 34.5],  // Will be updated when AOI loads
+    zoom: 10,
     zoomControl: true
 });
 
@@ -41,3 +41,5 @@ var LAYER_GROUPS = overlayGroups;
 // Log ready message
 console.log('🌿 Mangrove Interactive Map loaded successfully!');
 console.log('📅 Years:', YEARS.join(', '));
+console.log('📍 Data source: GEE exports');
+console.log('🔄 Waiting for AOI data to load...');
