@@ -12,7 +12,7 @@ function getProperty(props, keys) {
     return null;
 }
 
-// Load AOI GeoJSON (original GEE export)
+// Load AOI GeoJSON
 function loadAOIs() {
     console.log('📂 Loading AOI data from:', DATA_PATHS.aois);
     
@@ -47,7 +47,7 @@ function loadAOIs() {
                     var props = feature.properties;
                     
                     var aoiName = getProperty(props, ['name', 'id', 'system:index', 'AOI']);
-                    if (!aoiName) aoiName = 'AOI_001';
+                    if (!aoiName) aoiName = 'AOI_025';
                     
                     var area = getProperty(props, ['area_ha', 'Area_ha', 'area', 'Area']);
                     var ndvi = getProperty(props, ['mean_ndvi', 'Mean_NDVI', 'NDVI', 'ndvi']);
@@ -94,21 +94,58 @@ function loadAOIs() {
         });
 }
 
-// Load raster layers (as ImageOverlay for PNG)
+// Load raster layers (COGs)
 function loadRasterLayer(year, type) {
     var isMask = (type === 'mask');
-    var path = isMask ? DATA_PATHS.mangroveMasks[year] : DATA_PATHS.ndviRasters[year];
-    var group = isMask ? LAYER_GROUPS.masks : LAYER_GROUPS.ndvi;
-    var label = (isMask ? 'Mangrove Mask ' : 'NDVI ') + year;
+    var isRaw = (type === 'ndvi_raw');
+    var path;
+    var group;
+    var label;
     
-    // Use ImageOverlay for PNG files
-    var imageLayer = L.imageOverlay(path, map.getBounds(), {
-        opacity: isMask ? 0.6 : 0.8,
-        attribution: label
-    });
+    if (isMask) {
+        path = DATA_PATHS.mangroveMasks[year];
+        group = LAYER_GROUPS.masks;
+        label = 'Mangrove Mask ' + year;
+    } else if (isRaw) {
+        path = DATA_PATHS.ndviRaw[year];
+        group = LAYER_GROUPS.ndvi;
+        label = 'NDVI Raw ' + year;
+    } else {
+        path = DATA_PATHS.ndviRasters[year];
+        group = LAYER_GROUPS.ndvi;
+        label = 'NDVI ' + year;
+    }
     
-    group.addLayer(imageLayer);
-    console.log('✅ Loaded: ' + label + ' (as PNG)');
+    // Check if COG plugin is available
+    if (typeof L.tileLayer.cog === 'function') {
+        try {
+            var colorPalette;
+            if (isMask) {
+                colorPalette = ['rgba(0,0,0,0)', '#00FF00'];
+            } else if (isRaw) {
+                // For raw NDVI, use a scientific color palette
+                colorPalette = ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a'];
+            } else {
+                colorPalette = NDVI_PALETTE.colors;
+            }
+            
+            var rasterLayer = L.tileLayer.cog(path, {
+                colorPalette: colorPalette,
+                opacity: isMask ? 0.6 : 0.8,
+                attribution: label,
+                min: isRaw ? -0.5 : 0,
+                max: isRaw ? 0.8 : 1
+            });
+            
+            group.addLayer(rasterLayer);
+            console.log('✅ Loaded: ' + label);
+        } catch(e) {
+            console.warn('⚠️ Could not load ' + label + ':', e.message);
+        }
+    } else {
+        console.warn('⚠️ COG plugin not available for: ' + label);
+        console.info('ℹ️ Make sure leaflet-cog.min.js is loaded in index.html');
+    }
 }
 
 // Load all raster layers
@@ -117,6 +154,7 @@ function loadAllRasters() {
     YEARS.forEach(function(year) {
         loadRasterLayer(year, 'ndvi');
         loadRasterLayer(year, 'mask');
+        loadRasterLayer(year, 'ndvi_raw');
     });
 }
 
