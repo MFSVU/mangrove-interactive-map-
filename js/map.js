@@ -2,10 +2,10 @@
 // MAIN MAP INITIALIZATION
 // ============================================
 
-// Initialize the map
+// Initialize the map - UPDATE COORDINATES FOR YOUR AOI
 var map = L.map('map', {
-    center: [24.5, 35.0],
-    zoom: 7,
+    center: [26.0, 34.5],  // ← Replace with your AOI's center coordinates
+    zoom: 12,               // ← Adjust zoom level for your AOI
     zoomControl: true
 });
 
@@ -27,7 +27,7 @@ var overlayGroups = {
 
 // Add layer control
 var layerControl = L.control.layers(baseLayers, {
-    'AOI Boundaries': overlayGroups.aois,
+    'AOI Boundary': overlayGroups.aois,
     'Mangrove Masks': overlayGroups.masks,
     'NDVI Rasters': overlayGroups.ndvi
 }, {
@@ -41,4 +41,3 @@ var LAYER_GROUPS = overlayGroups;
 // Log ready message
 console.log('🌿 Mangrove Interactive Map loaded successfully!');
 console.log('📅 Years:', YEARS.join(', '));
-console.log('📍 Total AOIs:', Object.keys(aoisData || {}).length);
