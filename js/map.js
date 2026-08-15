@@ -4,8 +4,8 @@
 
 // Initialize the map
 var map = L.map('map', {
-    center: [26.0, 34.5],
-    zoom: 10,
+    center: [26.0, 34.5], // Will be updated when AOI loads
+    zoom: 12,
     zoomControl: true
 });
 
@@ -30,6 +30,7 @@ var yearGroups = {};
 YEARS.forEach(function(year) {
     yearGroups['ndvi_' + year] = L.layerGroup();
     yearGroups['mask_' + year] = L.layerGroup();
+    yearGroups['ndvi_raw_' + year] = L.layerGroup();
 });
 
 // Add all layer groups to map
@@ -48,6 +49,11 @@ var overlayLayers = {
 // Add NDVI layers for each year
 YEARS.forEach(function(year) {
     overlayLayers['NDVI ' + year] = yearGroups['ndvi_' + year];
+});
+
+// Add Raw NDVI layers for each year
+YEARS.forEach(function(year) {
+    overlayLayers['NDVI Raw ' + year] = yearGroups['ndvi_raw_' + year];
 });
 
 // Add Mangrove Mask layers for each year
