@@ -12,20 +12,16 @@ function loadAOIs() {
             return response.json();
         })
         .then(function(data) {
-            // Store AOI data globally for other functions
             window.aoisData = data;
             
-            // Add AOIs to the map
             var aoiLayer = L.geoJSON(data, {
                 style: function(feature) {
-                    var color = AOI_STYLE.color;
-                    // Optional: color by NDVI value or area
                     return {
-                        color: color,
-                        weight: AOI_STYLE.weight,
-                        opacity: AOI_STYLE.opacity,
-                        fillColor: color,
-                        fillOpacity: AOI_STYLE.fillOpacity
+                        color: '#FF4444',
+                        weight: 3,
+                        opacity: 0.9,
+                        fillColor: '#FF4444',
+                        fillOpacity: 0.1
                     };
                 },
                 onEachFeature: function(feature, layer) {
@@ -40,29 +36,29 @@ function loadAOIs() {
                     layer.on('mouseover', function() {
                         this.setStyle({
                             fillOpacity: 0.4,
-                            weight: 4
+                            weight: 5
                         });
                         this.bringToFront();
                     });
                     layer.on('mouseout', function() {
                         this.setStyle({
-                            fillOpacity: AOI_STYLE.fillOpacity,
-                            weight: AOI_STYLE.weight
+                            fillOpacity: 0.1,
+                            weight: 3
                         });
                     });
                 }
             });
             
-            // Add AOIs to the AOI layer group
             LAYER_GROUPS.aois.clearLayers();
             LAYER_GROUPS.aois.addLayer(aoiLayer);
             
+            // Fit map to AOI bounds
+            map.fitBounds(aoiLayer.getBounds());
+            
             console.log('✅ AOIs loaded successfully!');
-            console.log('📊 Total AOIs:', data.features ? data.features.length : 0);
         })
         .catch(function(error) {
             console.error('❌ Error loading AOIs:', error);
-            console.warn('ℹ️ Make sure aois.geojson exists in the data folder.');
         });
 }
 
@@ -73,34 +69,30 @@ function loadRasterLayer(year, type) {
     var group = isMask ? LAYER_GROUPS.masks : LAYER_GROUPS.ndvi;
     var label = isMask ? 'Mangrove Mask ' + year : 'NDVI ' + year;
     
-    // Use Leaflet COG plugin
-    // Note: This requires the leaflet-cog plugin to be loaded
-    // If you need an alternative method, you can use this fallback:
-    var rasterLayer = L.tileLayer.cog(path, {
-        colorPalette: isMask ? ['rgba(0,0,0,0)', '#00FF00'] : NDVI_PALETTE.colors,
-        opacity: isMask ? 0.6 : 0.8,
-        attribution: 'NDVI ' + year
-    });
-    
-    // Add to appropriate layer group
-    group.addLayer(rasterLayer);
-    
-    // Add to layer control with proper name
-    // This is handled by the base layer control
-    console.log('✅ Loaded: ' + label);
+    // Check if COG plugin is available
+    if (typeof L.tileLayer.cog === 'function') {
+        var rasterLayer = L.tileLayer.cog(path, {
+            colorPalette: isMask ? ['rgba(0,0,0,0)', '#00FF00'] : NDVI_PALETTE.colors,
+            opacity: isMask ? 0.6 : 0.8,
+            attribution: label
+        });
+        
+        group.addLayer(rasterLayer);
+        console.log('✅ Loaded: ' + label);
+    } else {
+        console.warn('⚠️ COG plugin not available for: ' + label);
+    }
 }
 
 // Load all raster layers
 function loadAllRasters() {
     YEARS.forEach(function(year) {
-        // Load NDVI
         try {
             loadRasterLayer(year, 'ndvi');
         } catch(e) {
             console.warn('⚠️ Could not load NDVI for ' + year);
         }
         
-        // Load mangrove mask
         try {
             loadRasterLayer(year, 'mask');
         } catch(e) {
@@ -111,16 +103,8 @@ function loadAllRasters() {
 
 // Initialize all layers
 function initializeLayers() {
-    // Load AOIs first
     loadAOIs();
-    
-    // Then load rasters (if COG plugin is available)
-    if (typeof L.tileLayer.cog === 'function') {
-        loadAllRasters();
-    } else {
-        console.warn('⚠️ Leaflet COG plugin not detected. Raster layers will not load.');
-        console.info('ℹ️ To load COGs, include: leaflet-cog.min.js');
-    }
+    loadAllRasters();
 }
 
 // When the document is ready, initialize
