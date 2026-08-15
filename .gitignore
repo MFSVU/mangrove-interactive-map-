@@ -1,26 +1,16 @@
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "AOI_001",
-        "name": "Nabq",
-        "area_ha": 5.68,
-        "mean_ndvi": 0.307
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [34.5, 28.0],
-            [34.6, 28.0],
-            [34.6, 28.1],
-            [34.5, 28.1],
-            [34.5, 28.0]
-          ]
-        ]
-      }
-    }
-  ]
-}
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Large data files (optional - comment out if included in repo)
+*.tif
+*.tiff
+*.geojson
+*.zip
+
+# Python cache
+__pycache__/
+*.pyc
