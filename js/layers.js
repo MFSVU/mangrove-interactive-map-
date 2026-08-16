@@ -1,5 +1,5 @@
 // ============================================================
-// RASTER AND AOI LAYER MANAGEMENT - FIXED
+// RASTER AND AOI LAYER MANAGEMENT - FULLY FIXED
 // ============================================================
 
 // ============================================================
@@ -43,7 +43,7 @@ function interpolateColor(color1, color2, factor) {
 }
 
 // ============================================================
-// NDVI COLOR FUNCTION - FIXED
+// NDVI COLOR FUNCTION
 // ============================================================
 
 function ndviColor(value) {
@@ -83,7 +83,7 @@ function ndviColor(value) {
 // ============================================================
 
 function loadAOIs() {
-    console.log('Loading AOI:', DATA_PATHS.aois);
+    console.log('📂 Loading AOI:', DATA_PATHS.aois);
 
     fetch(DATA_PATHS.aois)
         .then(function(response) {
@@ -93,7 +93,7 @@ function loadAOIs() {
             return response.json();
         })
         .then(function(data) {
-            console.log('AOI data loaded');
+            console.log('✅ AOI data loaded');
 
             if (!data.features || data.features.length === 0) {
                 console.warn('No AOI features found');
@@ -153,11 +153,11 @@ function loadAOIs() {
 }
 
 // ============================================================
-// GENERIC GEOTIFF LOADER
+// GENERIC GEOTIFF LOADER - FULLY FIXED
 // ============================================================
 
 function loadGeoTIFF(url, options) {
-    console.log('Loading GeoTIFF:', url);
+    console.log('📂 Loading GeoTIFF:', url);
 
     return fetch(url)
         .then(function(response) {
@@ -170,18 +170,39 @@ function loadGeoTIFF(url, options) {
             return parseGeoraster(arrayBuffer);
         })
         .then(function(georaster) {
+            // Get bounds for positioning
+            var bounds = georaster.getBoundingBox();
+            console.log('📐 GeoTIFF bounds:', bounds);
+            
             var layer = new GeoRasterLayer({
                 georaster: georaster,
-                opacity: options.opacity || 0.8,
+                opacity: options.opacity || 0.85,
                 resolution: 128,
+                background: 'rgba(0,0,0,0)',
+                bounds: bounds,
                 pixelValuesToColorFn: options.pixelValuesToColorFn
             });
+            
+            // Ensure layer stays on top
+            layer.on('add', function() {
+                console.log('✅ Layer added to map');
+                try {
+                    this.bringToFront();
+                } catch(e) {
+                    // Ignore if method doesn't exist
+                }
+            });
+            
             return layer;
+        })
+        .catch(function(error) {
+            console.error('❌ Failed to load:', url, error);
+            throw error;
         });
 }
 
 // ============================================================
-// LOAD NDVI - FIXED to use DATA_PATHS.ndvi
+// LOAD NDVI LAYER
 // ============================================================
 
 function loadNDVILayer(year, raw) {
@@ -192,7 +213,7 @@ function loadNDVILayer(year, raw) {
         path = DATA_PATHS.ndviRaw[year];
         group = YEAR_GROUPS['ndvi_raw_' + year];
     } else {
-        path = DATA_PATHS.ndvi[year];  // ← FIXED: was DATA_PATHS.ndviRasters
+        path = DATA_PATHS.ndvi[year];
         group = YEAR_GROUPS['ndvi_' + year];
     }
 
@@ -202,6 +223,7 @@ function loadNDVILayer(year, raw) {
     }
 
     if (group._rasterLoaded) {
+        console.log('Already loaded NDVI:', year, raw ? '(raw)' : '');
         return;
     }
 
@@ -218,6 +240,21 @@ function loadNDVILayer(year, raw) {
     )
     .then(function(layer) {
         group.addLayer(layer);
+        
+        // Try to fit map to first raster
+        if (!window._rasterLoaded) {
+            window._rasterLoaded = true;
+            try {
+                var bounds = layer.getBounds();
+                if (bounds && bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [40, 40] });
+                    console.log('📍 Map fit to raster bounds');
+                }
+            } catch(e) {
+                console.warn('Could not fit to raster bounds');
+            }
+        }
+        
         console.log('✅ NDVI loaded:', year, raw ? '(raw)' : '');
     })
     .catch(function(error) {
@@ -227,11 +264,11 @@ function loadNDVILayer(year, raw) {
 }
 
 // ============================================================
-// LOAD MANGROVE MASK - FIXED to use DATA_PATHS.masks
+// LOAD MANGROVE MASK LAYER
 // ============================================================
 
 function loadMaskLayer(year) {
-    var path = DATA_PATHS.masks[year];  // ← FIXED: was DATA_PATHS.mangroveMasks
+    var path = DATA_PATHS.masks[year];
     var group = YEAR_GROUPS['mask_' + year];
 
     if (!path) {
@@ -240,6 +277,7 @@ function loadMaskLayer(year) {
     }
 
     if (group._rasterLoaded) {
+        console.log('Already loaded mask:', year);
         return;
     }
 
@@ -269,34 +307,51 @@ function loadMaskLayer(year) {
 }
 
 // ============================================================
-// LOAD ALL RASTERS
+// LOAD ALL RASTERS ON DEMAND
 // ============================================================
 
 function initializeRasterLayers() {
+    console.log('📂 Loading all raster layers...');
     YEARS.forEach(function(year) {
-        loadNDVILayer(year, false);
-        loadNDVILayer(year, true);
-        loadMaskLayer(year);
+        // Load NDVI
+        setTimeout(function() {
+            loadNDVILayer(year, false);
+        }, 100 * (year - 2015));
+        
+        // Load Raw NDVI
+        setTimeout(function() {
+            loadNDVILayer(year, true);
+        }, 100 * (year - 2015) + 50);
+        
+        // Load Mask
+        setTimeout(function() {
+            loadMaskLayer(year);
+        }, 100 * (year - 2015) + 100);
     });
 }
 
 // ============================================================
-// LAYER CONTROL EVENTS - FIXED
+// LAYER CONTROL EVENTS
 // ============================================================
 
-map.on('overlayadd', function(event) {
+function loadRasterOnDemand(event) {
+    var layer = event.layer;
+
     YEARS.forEach(function(year) {
-        if (event.layer === YEAR_GROUPS['ndvi_' + year]) {
+        if (layer === YEAR_GROUPS['ndvi_' + year]) {
             loadNDVILayer(year, false);
         }
-        if (event.layer === YEAR_GROUPS['ndvi_raw_' + year]) {
+        if (layer === YEAR_GROUPS['ndvi_raw_' + year]) {
             loadNDVILayer(year, true);
         }
-        if (event.layer === YEAR_GROUPS['mask_' + year]) {
+        if (layer === YEAR_GROUPS['mask_' + year]) {
             loadMaskLayer(year);
         }
     });
-});
+}
+
+// Listen for layer activation
+map.on('overlayadd', loadRasterOnDemand);
 
 // ============================================================
 // INITIALIZATION
@@ -304,6 +359,12 @@ map.on('overlayadd', function(event) {
 
 function initializeLayers() {
     loadAOIs();
+    
+    // Preload rasters after AOI loads
+    setTimeout(function() {
+        // Load first year automatically
+        loadNDVILayer(2016, false);
+    }, 2000);
 }
 
 if (document.readyState === 'loading') {
