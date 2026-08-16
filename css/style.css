@@ -130,8 +130,60 @@ body {
     max-height:
         600px;
 
+    /*
+     * IMPORTANT:
+     * Enable vertical scrolling inside the layer panel.
+     */
     overflow-y:
-        auto;
+        auto !important;
+
+    overflow-x:
+        hidden !important;
+
+    /*
+     * Allow the browser/Leaflet control to receive
+     * mouse-wheel scrolling.
+     */
+    overscroll-behavior:
+        contain;
+
+    /*
+     * Improve scrolling on touch devices.
+     */
+    -webkit-overflow-scrolling:
+        touch;
+
+    /*
+     * Make the panel clearly behave as a scrollable
+     * independent interface element.
+     */
+    touch-action:
+        pan-y;
+
+    /*
+     * Keep the panel above the map.
+     */
+    position:
+        relative;
+
+    z-index:
+        1000;
+
+}
+
+
+/*
+ * The actual grouped layer content must also remain
+ * inside the scrollable control.
+ */
+
+.leaflet-control-layers-list {
+
+    max-height:
+        none;
+
+    overflow:
+        visible;
 
 }
 
@@ -242,6 +294,12 @@ body {
         overflow-y:
             auto;
 
+        overscroll-behavior:
+            contain;
+
+        -webkit-overflow-scrolling:
+            touch;
+
     }
 
 
@@ -254,7 +312,19 @@ body {
             260px;
 
         overflow-y:
-            auto;
+            auto !important;
+
+        overflow-x:
+            hidden !important;
+
+        overscroll-behavior:
+            contain;
+
+        -webkit-overflow-scrolling:
+            touch;
+
+        touch-action:
+            pan-y;
 
     }
 
