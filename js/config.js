@@ -252,10 +252,10 @@ const MASK_COLOR =
 const RASTER_OPTIONS = {
 
     ndviOpacity:
-        0.80,
+        1.0,
 
     maskOpacity:
-        0.60,
+        1.0,
 
     resolution:
         128
@@ -265,10 +265,6 @@ const RASTER_OPTIONS = {
 
 // ============================================================
 // AOI COLORS
-// ============================================================
-//
-// Different colors are used for AOI boundaries so that
-// multiple AOIs can be distinguished on the map.
 // ============================================================
 
 const AOI_COLORS = [
