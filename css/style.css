@@ -3,13 +3,9 @@
    ============================================================ */
 
 * {
-
     margin: 0;
-
     padding: 0;
-
     box-sizing: border-box;
-
 }
 
 
@@ -131,75 +127,38 @@ body {
         0 2px 8px
         rgba(0, 0, 0, 0.15) !important;
 
-    /*
-     * IMPORTANT:
-     * Limit the total height so the AOI list can scroll.
-     */
-
     max-height:
-        70vh !important;
+        600px;
 
     overflow-y:
-        auto !important;
-
-    overflow-x:
-        hidden !important;
-
-    /*
-     * Make the scrollbar usable.
-     */
-
-    scrollbar-width:
         auto;
 
 }
 
 
 /* ============================================================
-   WEBKIT SCROLLBAR
+   GROUPED LAYER CONTROL
    ============================================================ */
 
-.leaflet-control-layers::-webkit-scrollbar {
+.leaflet-control-layers-group-name {
 
-    width:
-        10px;
+    font-weight:
+        700;
 
-}
+    font-size:
+        13px;
 
+    color:
+        #2c3e50;
 
-.leaflet-control-layers::-webkit-scrollbar-track {
+    margin-top:
+        6px;
 
-    background:
-        #eeeeee;
-
-    border-radius:
-        5px;
-
-}
-
-
-.leaflet-control-layers::-webkit-scrollbar-thumb {
-
-    background:
-        #999999;
-
-    border-radius:
-        5px;
+    margin-bottom:
+        4px;
 
 }
 
-
-.leaflet-control-layers::-webkit-scrollbar-thumb:hover {
-
-    background:
-        #666666;
-
-}
-
-
-/* ============================================================
-   LAYER CONTROL LABELS
-   ============================================================ */
 
 .leaflet-control-layers label {
 
@@ -213,41 +172,10 @@ body {
         block;
 
     padding:
-        4px 0;
-
-    line-height:
-        1.4;
+        3px 0;
 
 }
 
-
-/* ============================================================
-   AOI GROUP LABELS
-   ============================================================ */
-
-.leaflet-control-layers label {
-
-    user-select:
-        none;
-
-}
-
-
-/* ============================================================
-   LAYER CONTROL INPUT
-   ============================================================ */
-
-.leaflet-control-layers input {
-
-    cursor:
-        pointer;
-
-}
-
-
-/* ============================================================
-   SEPARATOR
-   ============================================================ */
 
 .leaflet-control-layers-separator {
 
@@ -255,7 +183,7 @@ body {
         1px solid #ddd;
 
     margin:
-        6px 0;
+        5px 0;
 
 }
 
@@ -308,16 +236,25 @@ body {
         max-width:
             200px;
 
+        max-height:
+            60vh;
+
+        overflow-y:
+            auto;
+
     }
 
 
     .leaflet-control-layers {
 
         max-height:
-            60vh !important;
+            60vh;
 
         max-width:
-            250px;
+            260px;
+
+        overflow-y:
+            auto;
 
     }
 
