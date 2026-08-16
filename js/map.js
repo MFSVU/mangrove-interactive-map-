@@ -1,73 +1,191 @@
-// ============================================
+// ============================================================
 // MAIN MAP INITIALIZATION
-// ============================================
+// ============================================================
 
-// Initialize the map
-var map = L.map('map', {
-    center: [26.0, 34.5],
-    zoom: 12,
-    zoomControl: true
-});
 
-// Add base layers
+// ============================================================
+// CREATE MAP
+// ============================================================
+
+var map = L.map(
+    'map',
+    {
+        center: [
+            26.0,
+            34.5
+        ],
+
+        zoom: 12,
+
+        zoomControl: true
+    }
+);
+
+
+// ============================================================
+// BASEMAPS
+// ============================================================
+
 var baseLayers = {};
-Object.keys(BASEMAPS).forEach(function(key) {
-    baseLayers[key] = BASEMAPS[key];
+
+Object.keys(
+    BASEMAPS
+).forEach(function(key) {
+
+    baseLayers[key] =
+        BASEMAPS[key];
+
 });
 
-// Add default base layer
-BASEMAPS['ESRI Satellite'].addTo(map);
 
-// Create layer groups for organization
-var overlayGroups = {
-    aois: L.layerGroup().addTo(map),
-    masks: L.layerGroup(),
-    ndvi: L.layerGroup()
-};
+// Default basemap
 
-// Create separate layer groups for each year
-var yearGroups = {};
+BASEMAPS[
+    'ESRI Satellite'
+].addTo(map);
+
+
+// ============================================================
+// AOI GROUP
+// ============================================================
+
+var AOI_LAYER =
+    L.layerGroup()
+        .addTo(map);
+
+
+// ============================================================
+// YEAR-SPECIFIC RASTER GROUPS
+// ============================================================
+
+var YEAR_GROUPS = {};
+
 YEARS.forEach(function(year) {
-    yearGroups['ndvi_' + year] = L.layerGroup().addTo(map);
-    yearGroups['mask_' + year] = L.layerGroup().addTo(map);
-    yearGroups['ndvi_raw_' + year] = L.layerGroup().addTo(map);
+
+    YEAR_GROUPS[
+        'ndvi_' + year
+    ] =
+        L.layerGroup();
+
+
+    YEAR_GROUPS[
+        'mask_' + year
+    ] =
+        L.layerGroup();
+
+
+    YEAR_GROUPS[
+        'ndvi_raw_' + year
+    ] =
+        L.layerGroup();
+
 });
 
-// ============================================
-// LAYER CONTROL WITH SEPARATE YEAR BUTTONS
-// ============================================
+
+// ============================================================
+// OVERLAY LAYERS
+// ============================================================
 
 var overlayLayers = {
-    'AOI Boundary': overlayGroups.aois
+
+    'AOI Boundary':
+        AOI_LAYER
+
 };
 
-// Add NDVI layers for each year
+
+// ============================================================
+// ADD NDVI
+// ============================================================
+
 YEARS.forEach(function(year) {
-    overlayLayers['NDVI ' + year] = yearGroups['ndvi_' + year];
+
+    overlayLayers[
+        'NDVI ' + year
+    ] =
+        YEAR_GROUPS[
+            'ndvi_' + year
+        ];
+
 });
 
-// Add Raw NDVI layers for each year
+
+// ============================================================
+// ADD RAW NDVI
+// ============================================================
+
 YEARS.forEach(function(year) {
-    overlayLayers['NDVI Raw ' + year] = yearGroups['ndvi_raw_' + year];
+
+    overlayLayers[
+        'Raw NDVI ' + year
+    ] =
+        YEAR_GROUPS[
+            'ndvi_raw_' + year
+        ];
+
 });
 
-// Add Mangrove Mask layers for each year
+
+// ============================================================
+// ADD MASK
+// ============================================================
+
 YEARS.forEach(function(year) {
-    overlayLayers['Mangrove Mask ' + year] = yearGroups['mask_' + year];
+
+    overlayLayers[
+        'Mangrove Mask ' + year
+    ] =
+        YEAR_GROUPS[
+            'mask_' + year
+        ];
+
 });
 
-// Add layer control
-var layerControl = L.control.layers(baseLayers, overlayLayers, {
-    collapsed: false,
-    position: 'topright'
-}).addTo(map);
 
-// Store layer groups for access in layers.js
-var LAYER_GROUPS = overlayGroups;
-var YEAR_GROUPS = yearGroups;
+// ============================================================
+// LAYER CONTROL
+// ============================================================
 
-// Log ready message
-console.log('🌿 Mangrove Interactive Map loaded successfully!');
-console.log('📅 Years:', YEARS.join(', '));
-console.log('📍 Data source: GEE exports');
-console.log('🔄 Waiting for AOI data to load...');
+var layerControl =
+    L.control.layers(
+
+        baseLayers,
+
+        overlayLayers,
+
+        {
+            collapsed:
+                false,
+
+            position:
+                'topright'
+        }
+
+    ).addTo(map);
+
+
+// ============================================================
+// GLOBAL REFERENCES
+// ============================================================
+
+window.AOI_LAYER =
+    AOI_LAYER;
+
+window.YEAR_GROUPS =
+    YEAR_GROUPS;
+
+window.map =
+    map;
+
+window.layerControl =
+    layerControl;
+
+
+console.log(
+    '🌿 Mangrove Interactive Map initialized'
+);
+
+console.log(
+    'Years:',
+    YEARS
+);
