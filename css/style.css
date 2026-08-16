@@ -128,10 +128,34 @@ body {
         rgba(0, 0, 0, 0.15) !important;
 
     max-height:
-        450px;
+        600px;
 
     overflow-y:
         auto;
+
+}
+
+
+/* ============================================================
+   GROUPED LAYER CONTROL
+   ============================================================ */
+
+.leaflet-control-layers-group-name {
+
+    font-weight:
+        700;
+
+    font-size:
+        13px;
+
+    color:
+        #2c3e50;
+
+    margin-top:
+        6px;
+
+    margin-bottom:
+        4px;
 
 }
 
@@ -214,6 +238,20 @@ body {
 
         max-height:
             60vh;
+
+        overflow-y:
+            auto;
+
+    }
+
+
+    .leaflet-control-layers {
+
+        max-height:
+            60vh;
+
+        max-width:
+            260px;
 
         overflow-y:
             auto;
