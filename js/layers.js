@@ -1,191 +1,876 @@
-// ============================================
-// LAYER LOADING AND INTERACTIVITY - FIXED
-// ============================================
+// ============================================================
+// RASTER AND AOI LAYER MANAGEMENT
+// ============================================================
 
-// ============================================
-// DIAGNOSTIC: Check if COG plugin is loaded
-// ============================================
 
-console.log('🔍 Checking for COG plugin...');
-if (typeof L.tileLayer.cog === 'function') {
-    console.log('✅ COG plugin is loaded!');
+// ============================================================
+// CHECK REQUIRED LIBRARIES
+// ============================================================
+
+console.log(
+    'Checking raster libraries...'
+);
+
+
+if (
+    typeof parseGeoraster !==
+    'undefined'
+) {
+
+    console.log(
+        '✅ GeoRaster loaded'
+    );
+
 } else {
-    console.error('❌ COG plugin NOT loaded. Check index.html script tags.');
+
+    console.error(
+        '❌ GeoRaster not loaded'
+    );
+
 }
 
-// Function to safely get property from GEE feature
-function getProperty(props, keys) {
-    for (var i = 0; i < keys.length; i++) {
-        if (props[keys[i]] !== undefined && props[keys[i]] !== null) {
-            return props[keys[i]];
-        }
+
+if (
+    typeof GeoRasterLayer !==
+    'undefined'
+) {
+
+    console.log(
+        '✅ GeoRasterLayer loaded'
+    );
+
+} else {
+
+    console.error(
+        '❌ GeoRasterLayer not loaded'
+    );
+
+}
+
+
+// ============================================================
+// COLOR INTERPOLATION
+// ============================================================
+
+function hexToRgb(hex) {
+
+    hex =
+        hex.replace(
+            '#',
+            ''
+        );
+
+    return {
+
+        r:
+            parseInt(
+                hex.substring(0, 2),
+                16
+            ),
+
+        g:
+            parseInt(
+                hex.substring(2, 4),
+                16
+            ),
+
+        b:
+            parseInt(
+                hex.substring(4, 6),
+                16
+            )
+
+    };
+
+}
+
+
+function interpolateColor(
+    color1,
+    color2,
+    factor
+) {
+
+    var c1 =
+        hexToRgb(color1);
+
+    var c2 =
+        hexToRgb(color2);
+
+    var r =
+        Math.round(
+            c1.r +
+            factor *
+            (c2.r - c1.r)
+        );
+
+    var g =
+        Math.round(
+            c1.g +
+            factor *
+            (c2.g - c1.g)
+        );
+
+    var b =
+        Math.round(
+            c1.b +
+            factor *
+            (c2.b - c1.b)
+        );
+
+    return (
+        'rgb(' +
+        r + ',' +
+        g + ',' +
+        b +
+        ')'
+    );
+
+}
+
+
+// ============================================================
+// NDVI COLOR FUNCTION
+// ============================================================
+
+function ndviColor(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        isNaN(value) ||
+        value <= -9998
+    ) {
+
+        return null;
+
     }
-    return null;
+
+
+    var min =
+        NDVI_MIN;
+
+    var max =
+        NDVI_MAX;
+
+
+    if (value <= min) {
+
+        return NDVI_PALETTE[0];
+
+    }
+
+
+    if (value >= max) {
+
+        return NDVI_PALETTE[
+            NDVI_PALETTE.length - 1
+        ];
+
+    }
+
+
+    var normalized =
+        (
+            value - min
+        ) /
+        (
+            max - min
+        );
+
+
+    var scaled =
+        normalized *
+        (
+            NDVI_PALETTE.length - 1
+        );
+
+
+    var index =
+        Math.floor(
+            scaled
+        );
+
+
+    var fraction =
+        scaled - index;
+
+
+    if (
+        index >=
+        NDVI_PALETTE.length - 1
+    ) {
+
+        return NDVI_PALETTE[
+            NDVI_PALETTE.length - 1
+        ];
+
+    }
+
+
+    return interpolateColor(
+
+        NDVI_PALETTE[index],
+
+        NDVI_PALETTE[
+            index + 1
+        ],
+
+        fraction
+
+    );
+
 }
 
-// Load AOI GeoJSON
+
+// ============================================================
+// LOAD GEOJSON AOIs
+// ============================================================
+
 function loadAOIs() {
-    console.log('📂 Loading AOI data from:', DATA_PATHS.aois);
-    
-    fetch(DATA_PATHS.aois)
-        .then(function(response) {
-            if (!response.ok) {
-                throw new Error('Failed to load AOI data: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(function(data) {
-            window.aoisData = data;
-            
-            if (!data.features || data.features.length === 0) {
-                console.warn('⚠️ No features found in GeoJSON');
-                return;
-            }
-            
-            console.log('📊 AOI Properties:', data.features[0].properties);
-            
-            var aoiLayer = L.geoJSON(data, {
-                style: function(feature) {
-                    return {
-                        color: AOI_STYLE.color,
-                        weight: AOI_STYLE.weight,
-                        opacity: AOI_STYLE.opacity,
-                        fillColor: AOI_STYLE.fillColor,
-                        fillOpacity: AOI_STYLE.fillOpacity
-                    };
-                },
-                onEachFeature: function(feature, layer) {
-                    var props = feature.properties;
-                    
-                    var aoiName = getProperty(props, ['name', 'id', 'system:index', 'AOI']);
-                    if (!aoiName) aoiName = 'AOI_025';
-                    
-                    var area = getProperty(props, ['area_ha', 'Area_ha', 'area', 'Area']);
-                    var ndvi = getProperty(props, ['mean_ndvi', 'Mean_NDVI', 'NDVI', 'ndvi']);
-                    
-                    var popupContent = '<div style="min-width:160px;">';
-                    popupContent += '<strong>📍 ' + aoiName + '</strong><br>';
-                    popupContent += '<hr style="margin:4px 0;">';
-                    popupContent += 'Area: ' + (area !== null ? area.toFixed(2) + ' ha' : 'N/A') + '<br>';
-                    popupContent += 'Mean NDVI: ' + (ndvi !== null ? ndvi.toFixed(3) : 'N/A');
-                    popupContent += '</div>';
-                    layer.bindPopup(popupContent);
-                    
-                    layer.on('mouseover', function() {
-                        this.setStyle({
-                            fillOpacity: 0.4,
-                            weight: 5
-                        });
-                        this.bringToFront();
-                    });
-                    layer.on('mouseout', function() {
-                        this.setStyle({
-                            fillOpacity: AOI_STYLE.fillOpacity,
-                            weight: AOI_STYLE.weight
-                        });
-                    });
-                }
-            });
-            
-            LAYER_GROUPS.aois.clearLayers();
-            LAYER_GROUPS.aois.addLayer(aoiLayer);
-            
-            try {
-                var bounds = aoiLayer.getBounds();
-                map.fitBounds(bounds, {padding: [50, 50]});
-                window.AOI_BOUNDS = bounds;
-                console.log('📍 AOI Bounds set:', bounds);
-            } catch(e) {
-                console.warn('⚠️ Could not fit bounds, using default view');
-            }
-            
-            console.log('✅ AOI loaded successfully!');
-        })
-        .catch(function(error) {
-            console.error('❌ Error loading AOI:', error);
-        });
-}
 
-// ============================================
-// LOAD RASTER LAYERS WITH PROPER CHECK
-// ============================================
+    console.log(
+        'Loading AOI:',
+        DATA_PATHS.aois
+    );
 
-function loadRasterLayer(year, type) {
-    var isMask = (type === 'mask');
-    var isRaw = (type === 'ndvi_raw');
-    var path;
-    var group;
-    var label;
-    var opacity;
-    var colorPalette;
-    
-    if (isMask) {
-        path = DATA_PATHS.mangroveMasks[year];
-        group = LAYER_GROUPS.masks;
-        label = 'Mangrove Mask ' + year;
-        opacity = 0.6;
-        colorPalette = ['rgba(0,0,0,0)', '#00FF00'];
-    } else if (isRaw) {
-        path = DATA_PATHS.ndviRaw[year];
-        group = LAYER_GROUPS.ndvi;
-        label = 'NDVI Raw ' + year;
-        opacity = 0.8;
-        colorPalette = ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a'];
-    } else {
-        path = DATA_PATHS.ndviRasters[year];
-        group = LAYER_GROUPS.ndvi;
-        label = 'NDVI ' + year;
-        opacity = 0.8;
-        colorPalette = NDVI_PALETTE.colors;
-    }
-    
-    // Check if COG plugin is available
-    if (typeof L.tileLayer.cog === 'function') {
-        try {
-            var bounds = window.AOI_BOUNDS;
-            
-            var rasterLayer = L.tileLayer.cog(path, {
-                colorPalette: colorPalette,
-                opacity: opacity,
-                attribution: label,
-                bounds: bounds,
-                min: isRaw ? -0.5 : 0,
-                max: isRaw ? 0.8 : 1
-            });
-            
-            group.addLayer(rasterLayer);
-            console.log('✅ Loaded: ' + label);
-        } catch(e) {
-            console.warn('⚠️ Could not load ' + label + ':', e.message);
+
+    fetch(
+        DATA_PATHS.aois
+    )
+
+    .then(function(response) {
+
+        if (!response.ok) {
+
+            throw new Error(
+                'AOI HTTP error: ' +
+                response.status
+            );
+
         }
-    } else {
-        console.warn('⚠️ COG plugin not available for: ' + label);
-    }
+
+        return response.json();
+
+    })
+
+    .then(function(data) {
+
+        console.log(
+            'AOI data:',
+            data
+        );
+
+
+        if (
+            !data.features ||
+            data.features.length === 0
+        ) {
+
+            console.warn(
+                'No AOI features found'
+            );
+
+            return;
+
+        }
+
+
+        var aoiLayer =
+            L.geoJSON(
+                data,
+                {
+
+                    style:
+                        function(feature) {
+
+                            return AOI_STYLE;
+
+                        },
+
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            var props =
+                                feature.properties ||
+                                {};
+
+
+                            var name =
+                                props.name ||
+                                props.id ||
+                                'AOI';
+
+
+                            var area =
+                                props.area_ha;
+
+
+                            var ndvi =
+                                props.mean_ndvi;
+
+
+                            var html =
+                                '<strong>📍 ' +
+                                name +
+                                '</strong>';
+
+
+                            if (
+                                area !==
+                                undefined &&
+                                area !==
+                                null
+                            ) {
+
+                                html +=
+                                    '<br>Area: ' +
+                                    Number(area)
+                                        .toFixed(2) +
+                                    ' ha';
+
+                            }
+
+
+                            if (
+                                ndvi !==
+                                undefined &&
+                                ndvi !==
+                                null
+                            ) {
+
+                                html +=
+                                    '<br>Mean NDVI: ' +
+                                    Number(ndvi)
+                                        .toFixed(3);
+
+                            }
+
+
+                            layer.bindPopup(
+                                html
+                            );
+
+
+                            layer.on(
+                                'mouseover',
+                                function() {
+
+                                    this.setStyle({
+
+                                        fillOpacity:
+                                            0.30,
+
+                                        weight:
+                                            5
+
+                                    });
+
+                                    this.bringToFront();
+
+                                }
+                            );
+
+
+                            layer.on(
+                                'mouseout',
+                                function() {
+
+                                    this.setStyle({
+
+                                        fillOpacity:
+                                            AOI_STYLE.fillOpacity,
+
+                                        weight:
+                                            AOI_STYLE.weight
+
+                                    });
+
+                                }
+                            );
+
+                        }
+
+                }
+            );
+
+
+        AOI_LAYER.clearLayers();
+
+        AOI_LAYER.addLayer(
+            aoiLayer
+        );
+
+
+        var bounds =
+            aoiLayer.getBounds();
+
+
+        if (
+            bounds.isValid()
+        ) {
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding:
+                        [40, 40]
+                }
+            );
+
+        }
+
+
+        window.AOI_BOUNDS =
+            bounds;
+
+
+        console.log(
+            '✅ AOIs loaded'
+        );
+
+    })
+
+    .catch(function(error) {
+
+        console.error(
+            '❌ AOI loading error:',
+            error
+        );
+
+    });
+
 }
 
-// Load all raster layers
-function loadAllRasters() {
-    console.log('📂 Loading raster layers...');
-    setTimeout(function() {
-        YEARS.forEach(function(year) {
-            loadRasterLayer(year, 'ndvi');
-            loadRasterLayer(year, 'mask');
-            loadRasterLayer(year, 'ndvi_raw');
+
+// ============================================================
+// GENERIC GEOTIFF LOADER
+// ============================================================
+
+function loadGeoTIFF(
+    url,
+    options
+) {
+
+    console.log(
+        'Loading GeoTIFF:',
+        url
+    );
+
+
+    return fetch(url)
+
+        .then(function(response) {
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'GeoTIFF HTTP error ' +
+                    response.status +
+                    ': ' +
+                    url
+                );
+
+            }
+
+            return response.arrayBuffer();
+
+        })
+
+        .then(function(arrayBuffer) {
+
+            return parseGeoraster(
+                arrayBuffer
+            );
+
+        })
+
+        .then(function(georaster) {
+
+            console.log(
+                'GeoRaster:',
+                georaster
+            );
+
+
+            var layer =
+                new GeoRasterLayer({
+
+                    georaster:
+                        georaster,
+
+                    opacity:
+                        options.opacity,
+
+                    resolution:
+                        128,
+
+                    pixelValuesToColorFn:
+                        options.pixelValuesToColorFn
+
+                });
+
+
+            return layer;
+
         });
-    }, 2000);
+
 }
 
-// Initialize all layers
+
+// ============================================================
+// LOAD NDVI
+// ============================================================
+
+function loadNDVILayer(
+    year,
+    raw
+) {
+
+    var path;
+
+    var group;
+
+
+    if (raw) {
+
+        path =
+            DATA_PATHS
+                .ndviRaw[year];
+
+        group =
+            YEAR_GROUPS[
+                'ndvi_raw_' +
+                year
+            ];
+
+    } else {
+
+        path =
+            DATA_PATHS
+                .ndviRasters[year];
+
+        group =
+            YEAR_GROUPS[
+                'ndvi_' +
+                year
+            ];
+
+    }
+
+
+    if (!path) {
+
+        console.warn(
+            'No NDVI path for:',
+            year
+        );
+
+        return;
+
+    }
+
+
+    if (
+        group._rasterLoaded
+    ) {
+
+        return;
+
+    }
+
+
+    group._rasterLoaded =
+        true;
+
+
+    loadGeoTIFF(
+
+        path,
+
+        {
+
+            opacity:
+                0.80,
+
+            pixelValuesToColorFn:
+                function(values) {
+
+                    return ndviColor(
+                        values[0]
+                    );
+
+                }
+
+        }
+
+    )
+
+    .then(function(layer) {
+
+        group.addLayer(
+            layer
+        );
+
+
+        console.log(
+            '✅ NDVI loaded:',
+            year
+        );
+
+    })
+
+    .catch(function(error) {
+
+        group._rasterLoaded =
+            false;
+
+        console.error(
+            '❌ NDVI loading failed:',
+            year,
+            error
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// LOAD MANGROVE MASK
+// ============================================================
+
+function loadMaskLayer(
+    year
+) {
+
+    var path =
+        DATA_PATHS
+            .mangroveMasks[year];
+
+
+    var group =
+        YEAR_GROUPS[
+            'mask_' +
+            year
+        ];
+
+
+    if (!path) {
+
+        console.warn(
+            'No mask path for:',
+            year
+        );
+
+        return;
+
+    }
+
+
+    if (
+        group._rasterLoaded
+    ) {
+
+        return;
+
+    }
+
+
+    group._rasterLoaded =
+        true;
+
+
+    loadGeoTIFF(
+
+        path,
+
+        {
+
+            opacity:
+                MASK_OPACITY,
+
+            pixelValuesToColorFn:
+                function(values) {
+
+                    var value =
+                        values[0];
+
+
+                    if (
+                        value === null ||
+                        value === undefined ||
+                        isNaN(value) ||
+                        value === 0
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    return MASK_COLOR;
+
+                }
+
+        }
+
+    )
+
+    .then(function(layer) {
+
+        group.addLayer(
+            layer
+        );
+
+
+        console.log(
+            '✅ Mask loaded:',
+            year
+        );
+
+    })
+
+    .catch(function(error) {
+
+        group._rasterLoaded =
+            false;
+
+        console.error(
+            '❌ Mask loading failed:',
+            year,
+            error
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// LOAD ALL RASTERS
+// ============================================================
+
+function initializeRasterLayers() {
+
+    YEARS.forEach(function(year) {
+
+        loadNDVILayer(
+            year,
+            false
+        );
+
+        loadNDVILayer(
+            year,
+            true
+        );
+
+        loadMaskLayer(
+            year
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// LAYER CONTROL EVENTS
+// ============================================================
+//
+// This makes raster loading occur when the user
+// activates the corresponding layer.
+// ============================================================
+
+map.on(
+    'overlayadd',
+    function(event) {
+
+        YEARS.forEach(function(year) {
+
+            if (
+                event.layer ===
+                YEAR_GROUPS[
+                    'ndvi_' + year
+                ]
+            ) {
+
+                loadNDVILayer(
+                    year,
+                    false
+                );
+
+            }
+
+
+            if (
+                event.layer ===
+                YEAR_GROUPS[
+                    'ndvi_raw_' + year
+                ]
+            ) {
+
+                loadNDVILayer(
+                    year,
+                    true
+                );
+
+            }
+
+
+            if (
+                event.layer ===
+                YEAR_GROUPS[
+                    'mask_' + year
+                ]
+            ) {
+
+                loadMaskLayer(
+                    year
+                );
+
+            }
+
+        });
+
+    }
+);
+
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+
 function initializeLayers() {
+
     loadAOIs();
-    loadAllRasters();
+
 }
 
-// When the document is ready, initialize
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeLayers);
+
+if (
+    document.readyState ===
+    'loading'
+) {
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        initializeLayers
+    );
+
 } else {
+
     initializeLayers();
+
 }
 
-console.log('🗺️ Layers module loaded.');
+
+console.log(
+    '🗺️ Layers module loaded'
+);
