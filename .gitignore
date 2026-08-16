@@ -5,12 +5,10 @@
 .vscode/
 .idea/
 
-# Large data files (optional - comment out if included in repo)
-*.tif
-*.tiff
-*.geojson
-*.zip
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
+
+# Temporary files
+*.tmp
+*.log
