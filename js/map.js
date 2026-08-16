@@ -67,27 +67,19 @@ var AOI_LAYER =
 // ============================================================
 // RASTER GROUPS
 // ============================================================
+//
+// For every AOI/year combination:
+//
+// NDVI:
+//   ndvi_AOI_001_2016
+//
+// Mask:
+//   mask_AOI_001_2016
+//
+// ============================================================
 
 var YEAR_GROUPS = {};
 
-
-// ============================================================
-// CREATE AOI-SPECIFIC GROUPS
-// ============================================================
-//
-// Each AOI gets its own group:
-//
-// AOI_001
-//   ├── NDVI 2016
-//   ├── NDVI 2019
-//   ├── NDVI 2022
-//   ├── NDVI 2025
-//   ├── Mangrove Mask 2016
-//   ├── Mangrove Mask 2019
-//   ├── Mangrove Mask 2022
-//   └── Mangrove Mask 2025
-//
-// ============================================================
 
 AOI_NAMES.forEach(
     function(aoiName) {
@@ -127,7 +119,7 @@ var groupedOverlays = {};
 
 
 // ============================================================
-// AOI BOUNDARY
+// AOI BOUNDARY GROUP
 // ============================================================
 
 groupedOverlays[
@@ -141,7 +133,23 @@ groupedOverlays[
 
 
 // ============================================================
-// CREATE AOI GROUPS
+// CREATE AOI-SPECIFIC GROUPS
+// ============================================================
+//
+// Each AOI is a collapsible group.
+//
+// Example:
+//
+// AOI_001
+//     NDVI 2016
+//     NDVI 2019
+//     NDVI 2022
+//     NDVI 2025
+//     Mangrove Mask 2016
+//     Mangrove Mask 2019
+//     Mangrove Mask 2022
+//     Mangrove Mask 2025
+//
 // ============================================================
 
 AOI_NAMES.forEach(
@@ -151,7 +159,7 @@ AOI_NAMES.forEach(
 
 
         // ----------------------------------------------------
-        // NDVI
+        // NDVI layers
         // ----------------------------------------------------
 
         YEARS.forEach(
@@ -173,7 +181,7 @@ AOI_NAMES.forEach(
 
 
         // ----------------------------------------------------
-        // Mangrove Masks
+        // Mangrove Mask layers
         // ----------------------------------------------------
 
         YEARS.forEach(
@@ -200,7 +208,8 @@ AOI_NAMES.forEach(
 
         groupedOverlays[
             aoiName
-        ] = aoiGroup;
+        ] =
+            aoiGroup;
 
     }
 );
@@ -208,6 +217,19 @@ AOI_NAMES.forEach(
 
 // ============================================================
 // GROUPED LAYER CONTROL
+// ============================================================
+//
+// Requires:
+// leaflet-groupedlayercontrol
+//
+// This creates:
+//
+// AOI_001
+// AOI_002
+// AOI_003
+// ...
+//
+// Each AOI can be expanded/collapsed.
 // ============================================================
 
 var layerControl =
