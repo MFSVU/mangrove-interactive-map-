@@ -445,9 +445,9 @@ function loadAOIs() {
 
                                 if (
                                     area !==
-                                        undefined &&
+                                    undefined &&
                                     area !==
-                                        null
+                                    null
                                 ) {
 
                                     html +=
@@ -462,9 +462,9 @@ function loadAOIs() {
 
                                 if (
                                     ndvi !==
-                                        undefined &&
+                                    undefined &&
                                     ndvi !==
-                                        null
+                                    null
                                 ) {
 
                                     html +=
@@ -629,8 +629,7 @@ function loadAOIs() {
 // GENERIC GEOTIFF LOADER
 // ============================================================
 //
-// IMPORTANT:
-// zIndex is explicitly specified here.
+// zIndex is explicitly specified.
 //
 // NDVI:
 //   zIndex = 200
@@ -638,8 +637,6 @@ function loadAOIs() {
 // Mangrove mask:
 //   zIndex = 300
 //
-// Both therefore appear above the basemap, including
-// ESRI Satellite.
 // ============================================================
 
 function loadGeoTIFF(
@@ -703,9 +700,11 @@ function loadGeoTIFF(
                     georaster:
                         georaster,
 
+                    // 100% opacity
                     opacity:
-                        options.opacity ||
-                        0.8,
+                        options.opacity !== undefined
+                            ? options.opacity
+                            : 1.0,
 
                     resolution:
                         options.resolution ||
@@ -715,18 +714,15 @@ function loadGeoTIFF(
                         options.pixelValuesToColorFn,
 
                     zIndex:
-                        options.zIndex ||
-                        100
+                        options.zIndex !== undefined
+                            ? options.zIndex
+                            : 100
 
                 });
 
 
             // ------------------------------------------------
             // EXPLICITLY SET Z-INDEX
-            // ------------------------------------------------
-            //
-            // This is important when switching between
-            // OpenStreetMap and ESRI Satellite.
             // ------------------------------------------------
 
             if (
@@ -735,8 +731,9 @@ function loadGeoTIFF(
             ) {
 
                 layer.setZIndex(
-                    options.zIndex ||
-                    100
+                    options.zIndex !== undefined
+                        ? options.zIndex
+                        : 100
                 );
 
             }
@@ -807,10 +804,6 @@ function getMaskPath(
 //
 // There is ONLY ONE NDVI raster per AOI/year.
 //
-// Example:
-//
-// data/ndvi_rasters/AOI_001_ndvi_2016.tif
-//
 // Raw NDVI is NOT used.
 // ============================================================
 
@@ -879,11 +872,11 @@ function loadNDVILayer(
         {
 
             // ----------------------------------------------
-            // NDVI opacity
+            // NDVI opacity = 100%
             // ----------------------------------------------
 
             opacity:
-                RASTER_OPTIONS.ndviOpacity,
+                1.0,
 
 
             // ----------------------------------------------
@@ -895,8 +888,7 @@ function loadNDVILayer(
 
 
             // ----------------------------------------------
-            // IMPORTANT:
-            // NDVI is placed above the basemap.
+            // NDVI above basemap
             // ----------------------------------------------
 
             zIndex:
@@ -1049,11 +1041,11 @@ function loadMaskLayer(
         {
 
             // ----------------------------------------------
-            // Mask opacity
+            // Mask opacity = 100%
             // ----------------------------------------------
 
             opacity:
-                RASTER_OPTIONS.maskOpacity,
+                1.0,
 
 
             // ----------------------------------------------
@@ -1084,6 +1076,7 @@ function loadMaskLayer(
 
 
                     // NoData / background
+
                     if (
                         value === null ||
                         value === undefined ||
@@ -1160,21 +1153,7 @@ function loadMaskLayer(
 // INITIALIZE RASTER LAYERS
 // ============================================================
 //
-// IMPORTANT:
-//
-// We DO NOT load all GeoTIFFs here.
-//
-// With 28 AOIs:
-//
-// 28 × 4 NDVI
-// 28 × 4 Masks
-//
-// = 224 possible raster files.
-//
-// Loading them all at startup would be unnecessarily heavy.
-//
-// Instead, they are loaded when the user activates the
-// corresponding layer in the layer control.
+// Raster files are loaded on demand when activated.
 // ============================================================
 
 function initializeRasterLayers() {
