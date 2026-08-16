@@ -1,5 +1,5 @@
 // ============================================
-// LAYER LOADING AND INTERACTIVITY
+// LAYER LOADING AND INTERACTIVITY - FIXED
 // ============================================
 
 // Function to safely get property from GEE feature
@@ -80,7 +80,10 @@ function loadAOIs() {
             LAYER_GROUPS.aois.addLayer(aoiLayer);
             
             try {
-                map.fitBounds(aoiLayer.getBounds(), {padding: [50, 50]});
+                var bounds = aoiLayer.getBounds();
+                map.fitBounds(bounds, {padding: [50, 50]});
+                // Store bounds for raster layers
+                window.AOI_BOUNDS = bounds;
             } catch(e) {
                 console.warn('⚠️ Could not fit bounds, using default view');
             }
@@ -94,51 +97,63 @@ function loadAOIs() {
         });
 }
 
-// Load raster layers (COGs)
+// ============================================
+// FIXED: Load raster layers with proper bounds
+// ============================================
+
 function loadRasterLayer(year, type) {
     var isMask = (type === 'mask');
     var isRaw = (type === 'ndvi_raw');
     var path;
     var group;
     var label;
+    var opacity;
+    var colorPalette;
     
     if (isMask) {
         path = DATA_PATHS.mangroveMasks[year];
         group = LAYER_GROUPS.masks;
         label = 'Mangrove Mask ' + year;
+        opacity = 0.6;
+        colorPalette = ['rgba(0,0,0,0)', '#00FF00'];
     } else if (isRaw) {
         path = DATA_PATHS.ndviRaw[year];
         group = LAYER_GROUPS.ndvi;
         label = 'NDVI Raw ' + year;
+        opacity = 0.8;
+        colorPalette = ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a'];
     } else {
         path = DATA_PATHS.ndviRasters[year];
         group = LAYER_GROUPS.ndvi;
         label = 'NDVI ' + year;
+        opacity = 0.8;
+        colorPalette = NDVI_PALETTE.colors;
     }
     
     // Check if COG plugin is available
     if (typeof L.tileLayer.cog === 'function') {
         try {
-            var colorPalette;
-            if (isMask) {
-                colorPalette = ['rgba(0,0,0,0)', '#00FF00'];
-            } else if (isRaw) {
-                // For raw NDVI, use a scientific color palette
-                colorPalette = ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a'];
-            } else {
-                colorPalette = NDVI_PALETTE.colors;
-            }
+            // Get the AOI bounds for positioning
+            var bounds = window.AOI_BOUNDS;
             
+            // Create the COG layer with proper bounds
             var rasterLayer = L.tileLayer.cog(path, {
                 colorPalette: colorPalette,
-                opacity: isMask ? 0.6 : 0.8,
+                opacity: opacity,
                 attribution: label,
+                bounds: bounds,  // ← KEY FIX: Set bounds
                 min: isRaw ? -0.5 : 0,
                 max: isRaw ? 0.8 : 1
             });
             
+            // Add to the correct layer group
             group.addLayer(rasterLayer);
-            console.log('✅ Loaded: ' + label);
+            console.log('✅ Loaded: ' + label + ' (with bounds)');
+            
+            // Force redraw
+            if (map) {
+                map.invalidateSize();
+            }
         } catch(e) {
             console.warn('⚠️ Could not load ' + label + ':', e.message);
         }
@@ -151,21 +166,21 @@ function loadRasterLayer(year, type) {
 // Load all raster layers
 function loadAllRasters() {
     console.log('📂 Loading raster layers...');
-    YEARS.forEach(function(year) {
-        loadRasterLayer(year, 'ndvi');
-        loadRasterLayer(year, 'mask');
-        loadRasterLayer(year, 'ndvi_raw');
-    });
+    // Wait a bit for AOI bounds to be set
+    setTimeout(function() {
+        YEARS.forEach(function(year) {
+            loadRasterLayer(year, 'ndvi');
+            loadRasterLayer(year, 'mask');
+            loadRasterLayer(year, 'ndvi_raw');
+        });
+    }, 2000);
 }
 
 // Initialize all layers
 function initializeLayers() {
     loadAOIs();
-    
-    // Load rasters after AOI is loaded
-    setTimeout(function() {
-        loadAllRasters();
-    }, 1000);
+    // Rasters will load after AOI bounds are set
+    loadAllRasters();
 }
 
 // When the document is ready, initialize
