@@ -4,7 +4,7 @@
 
 // Initialize the map
 var map = L.map('map', {
-    center: [26.0, 34.5], // Will be updated when AOI loads
+    center: [26.0, 34.5],
     zoom: 12,
     zoomControl: true
 });
@@ -28,14 +28,9 @@ var overlayGroups = {
 // Create separate layer groups for each year
 var yearGroups = {};
 YEARS.forEach(function(year) {
-    yearGroups['ndvi_' + year] = L.layerGroup();
-    yearGroups['mask_' + year] = L.layerGroup();
-    yearGroups['ndvi_raw_' + year] = L.layerGroup();
-});
-
-// Add all layer groups to map
-Object.keys(yearGroups).forEach(function(key) {
-    yearGroups[key].addTo(map);
+    yearGroups['ndvi_' + year] = L.layerGroup().addTo(map);
+    yearGroups['mask_' + year] = L.layerGroup().addTo(map);
+    yearGroups['ndvi_raw_' + year] = L.layerGroup().addTo(map);
 });
 
 // ============================================
