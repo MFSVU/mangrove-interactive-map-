@@ -17,13 +17,21 @@ const YEARS = [
 // Available AOIs:
 // AOI_001 ... AOI_028
 //
-// Add/remove AOIs here depending on the data available
-// in the project data folders.
+// The application will use the corresponding files:
 //
-// If all AOIs have been exported from GEE, keep all of them.
+// AOI_001_ndvi_2016.tif
+// AOI_001_ndvi_2019.tif
+// ...
+//
+// and:
+//
+// AOI_001_mask_2016.tif
+// AOI_001_mask_2019.tif
+// ...
 // ============================================================
 
 const AOI_NAMES = [
+
     "AOI_001",
     "AOI_002",
     "AOI_003",
@@ -52,6 +60,7 @@ const AOI_NAMES = [
     "AOI_026",
     "AOI_027",
     "AOI_028"
+
 ];
 
 
@@ -66,11 +75,13 @@ const BASEMAPS = {
         L.tileLayer(
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
+
                 attribution:
                     "&copy; OpenStreetMap contributors",
 
                 maxZoom:
                     19
+
             }
         ),
 
@@ -80,13 +91,16 @@ const BASEMAPS = {
         L.tileLayer(
             "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             {
+
                 attribution:
                     "&copy; Esri",
 
                 maxZoom:
                     19
+
             }
         )
+
 };
 
 
@@ -94,22 +108,19 @@ const BASEMAPS = {
 // NDVI COLOR PALETTE
 // ============================================================
 //
-// NDVI range:
+// NDVI:
 //
-//   -1.0  -> dark red
-//   -0.8  -> red
-//   -0.6  -> red-orange
-//   -0.4  -> light red
-//   -0.2  -> very light red
-//    0.0  -> white
-//   +0.2  -> very light green
-//   +0.4  -> light green
-//   +0.6  -> green
-//   +0.8  -> dark green
-//   +1.0  -> very dark green
+// -1.0 ---------------- 0 ---------------- +1.0
+//  RED                 WHITE              GREEN
 //
-// This palette is used only for visualization.
-// The GeoTIFF files contain the original numerical NDVI.
+// Negative NDVI:
+//   -1.0 to 0.0 = red grades
+//
+// Positive NDVI:
+//    0.0 to +1.0 = green grades
+//
+// The GeoTIFF remains a numerical NDVI raster.
+// These colors are ONLY for web visualization.
 // ============================================================
 
 const NDVI_PALETTE = {
@@ -137,6 +148,7 @@ const NDVI_PALETTE = {
         "#00441b"
 
     ]
+
 };
 
 
@@ -144,7 +156,7 @@ const NDVI_PALETTE = {
 // DATA PATHS
 // ============================================================
 //
-// The GEE exports now have this structure:
+// Project structure:
 //
 // data/
 // ├── AOIs_Selected_Geojson.geojson
@@ -152,40 +164,35 @@ const NDVI_PALETTE = {
 // ├── ndvi_rasters/
 // │   ├── AOI_001_ndvi_2016.tif
 // │   ├── AOI_001_ndvi_2019.tif
-// │   ├── ...
+// │   ├── AOI_001_ndvi_2022.tif
+// │   ├── AOI_001_ndvi_2025.tif
 // │   ├── AOI_002_ndvi_2016.tif
 // │   └── ...
 // │
 // └── mangrove_masks/
 //     ├── AOI_001_mask_2016.tif
 //     ├── AOI_001_mask_2019.tif
+//     ├── AOI_001_mask_2022.tif
+//     ├── AOI_001_mask_2025.tif
 //     └── ...
 //
-// No Raw NDVI files are used.
+// IMPORTANT:
+// Raw NDVI is intentionally NOT included.
 // ============================================================
 
 const DATA_PATHS = {
 
-    // --------------------------------------------------------
     // AOI GeoJSON
-    // --------------------------------------------------------
-
     aois:
         "data/AOIs_Selected_Geojson.geojson",
 
 
-    // --------------------------------------------------------
     // NDVI folder
-    // --------------------------------------------------------
-
     ndviFolder:
         "data/ndvi_rasters/",
 
 
-    // --------------------------------------------------------
     // Mangrove mask folder
-    // --------------------------------------------------------
-
     maskFolder:
         "data/mangrove_masks/"
 
@@ -212,11 +219,12 @@ const AOI_STYLE = {
 
     fillOpacity:
         0.08
+
 };
 
 
 // ============================================================
-// RASTER DISPLAY OPTIONS
+// NDVI RANGE
 // ============================================================
 
 const NDVI_MIN =
@@ -226,13 +234,20 @@ const NDVI_MAX =
     1.0;
 
 
+// ============================================================
+// MANGROVE MASK
+// ============================================================
+
 const MASK_OPACITY =
     0.60;
-
 
 const MASK_COLOR =
     "rgba(0, 255, 0, 0.7)";
 
+
+// ============================================================
+// RASTER OPTIONS
+// ============================================================
 
 const RASTER_OPTIONS = {
 
@@ -252,8 +267,8 @@ const RASTER_OPTIONS = {
 // AOI COLORS
 // ============================================================
 //
-// Different colors make it easier to distinguish multiple
-// AOI boundaries on the map.
+// Different colors are used for AOI boundaries so that
+// multiple AOIs can be distinguished on the map.
 // ============================================================
 
 const AOI_COLORS = [
