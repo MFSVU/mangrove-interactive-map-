@@ -7,22 +7,15 @@
 // CREATE MAP
 // ============================================================
 
-var map =
-    L.map(
-        "map",
-        {
+var map = L.map('map', {
 
-            center:
-                [26.0, 34.5],
+    center: [26.0, 34.5],
 
-            zoom:
-                12,
+    zoom: 12,
 
-            zoomControl:
-                true
+    zoomControl: true
 
-        }
-    );
+});
 
 
 // ============================================================
@@ -31,10 +24,7 @@ var map =
 
 var baseLayers = {};
 
-
-Object.keys(
-    BASEMAPS
-).forEach(function(key) {
+Object.keys(BASEMAPS).forEach(function(key) {
 
     baseLayers[key] =
         BASEMAPS[key];
@@ -46,216 +36,146 @@ Object.keys(
 // DEFAULT BASEMAP
 // ============================================================
 
-BASEMAPS[
-    "ESRI Satellite"
-].addTo(
-    map
-);
-
-
-// ============================================================
-// AOI GROUP
-// ============================================================
-
-var AOI_LAYER =
-    L.layerGroup()
-      .addTo(
-          map
-      );
-
-
-// ============================================================
-// RASTER GROUPS
-// ============================================================
-//
-// For every AOI/year combination:
-//
-// NDVI:
-//   ndvi_AOI_001_2016
-//
-// Mask:
-//   mask_AOI_001_2016
-//
-// ============================================================
-
-var YEAR_GROUPS = {};
-
-
-AOI_NAMES.forEach(
-    function(aoiName) {
-
-        YEARS.forEach(
-            function(year) {
-
-                YEAR_GROUPS[
-                    "ndvi_" +
-                    aoiName +
-                    "_" +
-                    year
-                ] =
-                    L.layerGroup();
-
-
-                YEAR_GROUPS[
-                    "mask_" +
-                    aoiName +
-                    "_" +
-                    year
-                ] =
-                    L.layerGroup();
-
-            }
-        );
-
-    }
-);
-
-
-// ============================================================
-// GROUPED OVERLAY LAYERS
-// ============================================================
-
-var groupedOverlays = {};
+BASEMAPS['ESRI Satellite'].addTo(map);
 
 
 // ============================================================
 // AOI BOUNDARY GROUP
 // ============================================================
 
-groupedOverlays[
-    "AOI Boundaries"
-] = {
+var AOI_LAYER =
+    L.layerGroup().addTo(map);
 
-    "All AOI Boundaries":
+
+// ============================================================
+// AOI GROUPS
+// ============================================================
+//
+// Structure:
+//
+// AOI_001
+//   ├── NDVI 2016
+//   ├── NDVI 2019
+//   ├── NDVI 2022
+//   ├── NDVI 2025
+//   ├── Mangrove Mask 2016
+//   ├── Mangrove Mask 2019
+//   ├── Mangrove Mask 2022
+//   └── Mangrove Mask 2025
+//
+// ============================================================
+
+var AOI_GROUPS = {};
+
+
+// ============================================================
+// CREATE AOI GROUPS
+// ============================================================
+
+AOI_NAMES.forEach(function(aoi) {
+
+    AOI_GROUPS[aoi] = {
+
+        all:
+            L.layerGroup(),
+
+        ndvi: {},
+
+        mask: {}
+
+    };
+
+
+    YEARS.forEach(function(year) {
+
+        AOI_GROUPS[aoi].ndvi[year] =
+            L.layerGroup();
+
+        AOI_GROUPS[aoi].mask[year] =
+            L.layerGroup();
+
+    });
+
+});
+
+
+// ============================================================
+// OVERLAY LAYERS
+// ============================================================
+
+var overlayLayers = {
+
+    "AOI Boundaries":
         AOI_LAYER
 
 };
 
 
 // ============================================================
-// CREATE AOI-SPECIFIC GROUPS
+// CREATE NESTED AOI GROUPS
 // ============================================================
 //
-// Each AOI is a collapsible group.
-//
-// Example:
-//
-// AOI_001
-//     NDVI 2016
-//     NDVI 2019
-//     NDVI 2022
-//     NDVI 2025
-//     Mangrove Mask 2016
-//     Mangrove Mask 2019
-//     Mangrove Mask 2022
-//     Mangrove Mask 2025
-//
-// ============================================================
-
-AOI_NAMES.forEach(
-    function(aoiName) {
-
-        var aoiGroup = {};
-
-
-        // ----------------------------------------------------
-        // NDVI layers
-        // ----------------------------------------------------
-
-        YEARS.forEach(
-            function(year) {
-
-                aoiGroup[
-                    "NDVI " + year
-                ] =
-
-                    YEAR_GROUPS[
-                        "ndvi_" +
-                        aoiName +
-                        "_" +
-                        year
-                    ];
-
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // Mangrove Mask layers
-        // ----------------------------------------------------
-
-        YEARS.forEach(
-            function(year) {
-
-                aoiGroup[
-                    "Mangrove Mask " + year
-                ] =
-
-                    YEAR_GROUPS[
-                        "mask_" +
-                        aoiName +
-                        "_" +
-                        year
-                    ];
-
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // Add AOI group
-        // ----------------------------------------------------
-
-        groupedOverlays[
-            aoiName
-        ] =
-            aoiGroup;
-
-    }
-);
-
-
-// ============================================================
-// GROUPED LAYER CONTROL
-// ============================================================
-//
-// Requires:
-// leaflet-groupedlayercontrol
-//
-// This creates:
+// Leaflet's standard layer control does not natively support
+// nested groups. Therefore, the actual raster groups are
+// managed programmatically while the control presents:
 //
 // AOI_001
 // AOI_002
 // AOI_003
 // ...
 //
-// Each AOI can be expanded/collapsed.
+// Each AOI has an "All layers" control plus individual layers.
+//
+// ============================================================
+
+AOI_NAMES.forEach(function(aoi) {
+
+    overlayLayers[aoi + " — All layers"] =
+        AOI_GROUPS[aoi].all;
+
+
+    YEARS.forEach(function(year) {
+
+        overlayLayers[
+            "&nbsp;&nbsp;NDVI " + year
+        ] =
+            AOI_GROUPS[aoi].ndvi[year];
+
+    });
+
+
+    YEARS.forEach(function(year) {
+
+        overlayLayers[
+            "&nbsp;&nbsp;Mangrove Mask " + year
+        ] =
+            AOI_GROUPS[aoi].mask[year];
+
+    });
+
+});
+
+
+// ============================================================
+// LAYER CONTROL
 // ============================================================
 
 var layerControl =
-
-    L.control.groupedLayers(
+    L.control.layers(
 
         baseLayers,
 
-        groupedOverlays,
+        overlayLayers,
 
         {
 
-            collapsed:
-                false,
+            collapsed: false,
 
-            position:
-                "topright",
-
-            groupCheckboxes:
-                false
+            position: 'topright'
 
         }
 
-    ).addTo(
-        map
-    );
+    ).addTo(map);
 
 
 // ============================================================
@@ -265,31 +185,59 @@ var layerControl =
 window.AOI_LAYER =
     AOI_LAYER;
 
-
-window.YEAR_GROUPS =
-    YEAR_GROUPS;
-
+window.AOI_GROUPS =
+    AOI_GROUPS;
 
 window.map =
     map;
 
-
 window.layerControl =
     layerControl;
 
+window.overlayLayers =
+    overlayLayers;
+
+
+// ============================================================
+// KEEP LAYER CONTROL SCROLLABLE
+// ============================================================
+
+setTimeout(function() {
+
+    var control =
+        document.querySelector(
+            '.leaflet-control-layers'
+        );
+
+    if (control) {
+
+        control.addEventListener(
+            'wheel',
+            function(event) {
+
+                event.stopPropagation();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+    }
+
+}, 500);
+
 
 console.log(
-    "🌿 Mangrove Interactive Map initialized"
+    '🌿 Mangrove Interactive Map initialized'
 );
 
-
 console.log(
-    "Number of AOIs:",
-    AOI_NAMES.length
+    'AOIs:',
+    AOI_NAMES
 );
 
-
 console.log(
-    "Years:",
+    'Years:',
     YEARS
 );
