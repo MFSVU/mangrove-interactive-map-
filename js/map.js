@@ -230,6 +230,7 @@ AOI_NAMES.forEach(
 // ...
 //
 // Each AOI can be expanded/collapsed.
+//
 // ============================================================
 
 var layerControl =
@@ -259,6 +260,56 @@ var layerControl =
 
 
 // ============================================================
+// IMPORTANT: ENABLE MOUSE-WHEEL SCROLLING
+// INSIDE THE LAYER CONTROL
+// ============================================================
+//
+// By default, Leaflet can allow wheel events over a control
+// to propagate to the map. This causes the map to zoom when
+// the mouse is over the long AOI list.
+//
+// These two Leaflet functions stop the control's mouse events
+// from propagating to the map while preserving normal map
+// zooming everywhere else.
+//
+// ============================================================
+
+var layerControlContainer =
+    layerControl.getContainer();
+
+
+if (
+    layerControlContainer
+) {
+
+    // Prevent clicks and other control events
+    // from interacting with the map.
+
+    L.DomEvent.disableClickPropagation(
+        layerControlContainer
+    );
+
+
+    // Prevent mouse-wheel events from reaching
+    // the map.
+
+    L.DomEvent.disableScrollPropagation(
+        layerControlContainer
+    );
+
+
+    // Explicitly ensure the control itself can scroll.
+
+    layerControlContainer.style.overflowY =
+        "auto";
+
+    layerControlContainer.style.overflowX =
+        "hidden";
+
+}
+
+
+// ============================================================
 // GLOBAL REFERENCES
 // ============================================================
 
@@ -278,6 +329,10 @@ window.layerControl =
     layerControl;
 
 
+// ============================================================
+// INITIALIZATION MESSAGE
+// ============================================================
+
 console.log(
     "🌿 Mangrove Interactive Map initialized"
 );
@@ -292,4 +347,9 @@ console.log(
 console.log(
     "Years:",
     YEARS
+);
+
+
+console.log(
+    "✅ Layer-control mouse-wheel scrolling enabled"
 );
