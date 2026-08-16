@@ -2,6 +2,17 @@
 // LAYER LOADING AND INTERACTIVITY - FIXED
 // ============================================
 
+// ============================================
+// DIAGNOSTIC: Check if COG plugin is loaded
+// ============================================
+
+console.log('🔍 Checking for COG plugin...');
+if (typeof L.tileLayer.cog === 'function') {
+    console.log('✅ COG plugin is loaded!');
+} else {
+    console.error('❌ COG plugin NOT loaded. Check index.html script tags.');
+}
+
 // Function to safely get property from GEE feature
 function getProperty(props, keys) {
     for (var i = 0; i < keys.length; i++) {
@@ -82,23 +93,21 @@ function loadAOIs() {
             try {
                 var bounds = aoiLayer.getBounds();
                 map.fitBounds(bounds, {padding: [50, 50]});
-                // Store bounds for raster layers
                 window.AOI_BOUNDS = bounds;
+                console.log('📍 AOI Bounds set:', bounds);
             } catch(e) {
                 console.warn('⚠️ Could not fit bounds, using default view');
             }
             
             console.log('✅ AOI loaded successfully!');
-            console.log('📍 AOI Name:', aoiLayer.getLayers()[0]?.feature?.properties?.name || 'Unknown');
         })
         .catch(function(error) {
             console.error('❌ Error loading AOI:', error);
-            console.info('ℹ️ Make sure the GeoJSON file exists at: ' + DATA_PATHS.aois);
         });
 }
 
 // ============================================
-// FIXED: Load raster layers with proper bounds
+// LOAD RASTER LAYERS WITH PROPER CHECK
 // ============================================
 
 function loadRasterLayer(year, type) {
@@ -133,40 +142,30 @@ function loadRasterLayer(year, type) {
     // Check if COG plugin is available
     if (typeof L.tileLayer.cog === 'function') {
         try {
-            // Get the AOI bounds for positioning
             var bounds = window.AOI_BOUNDS;
             
-            // Create the COG layer with proper bounds
             var rasterLayer = L.tileLayer.cog(path, {
                 colorPalette: colorPalette,
                 opacity: opacity,
                 attribution: label,
-                bounds: bounds,  // ← KEY FIX: Set bounds
+                bounds: bounds,
                 min: isRaw ? -0.5 : 0,
                 max: isRaw ? 0.8 : 1
             });
             
-            // Add to the correct layer group
             group.addLayer(rasterLayer);
-            console.log('✅ Loaded: ' + label + ' (with bounds)');
-            
-            // Force redraw
-            if (map) {
-                map.invalidateSize();
-            }
+            console.log('✅ Loaded: ' + label);
         } catch(e) {
             console.warn('⚠️ Could not load ' + label + ':', e.message);
         }
     } else {
         console.warn('⚠️ COG plugin not available for: ' + label);
-        console.info('ℹ️ Make sure leaflet-cog.min.js is loaded in index.html');
     }
 }
 
 // Load all raster layers
 function loadAllRasters() {
     console.log('📂 Loading raster layers...');
-    // Wait a bit for AOI bounds to be set
     setTimeout(function() {
         YEARS.forEach(function(year) {
             loadRasterLayer(year, 'ndvi');
@@ -179,7 +178,6 @@ function loadAllRasters() {
 // Initialize all layers
 function initializeLayers() {
     loadAOIs();
-    // Rasters will load after AOI bounds are set
     loadAllRasters();
 }
 
@@ -190,4 +188,4 @@ if (document.readyState === 'loading') {
     initializeLayers();
 }
 
-console.log('🗺️ Layers module loaded. Ready to fetch data.');
+console.log('🗺️ Layers module loaded.');
