@@ -12,12 +12,14 @@ Interactive web map for monitoring mangrove distribution and vegetation health a
   - 2019
   - 2022
   - 2025
-- Raw NDVI raster visualization
 - Cloud-Optimized GeoTIFF support
-- Interactive layer control
+- Interactive grouped layer control
+- AOI-specific raster groups
 - Satellite basemap
 - OpenStreetMap basemap
 - AOI popups
+- Mouse-wheel scrolling inside the layer control
+- Independent layer-control scrolling without zooming the map
 
 ## 📡 Data Source
 
@@ -73,14 +75,11 @@ Displays the selected study areas.
 
 ### NDVI
 
-Displays NDVI values using the following color scale:
+Displays numerical NDVI values using a continuous color scale:
 
-- -0.5 to 0.0
-- 0.0 to 0.2
-- 0.2 to 0.4
-- 0.4 to 0.6
-- 0.6 to 0.8
-- 0.8 to 1.0
+- -1.0 to 0.0: red grades
+- 0.0: white
+- 0.0 to 1.0: green grades
 
 ### Mangrove Mask
 
@@ -88,9 +87,27 @@ Displays pixels satisfying:
 
 NDVI >= 0.20
 
-### Raw NDVI
+### Layer Control
 
-Displays the original numerical NDVI raster exported from Google Earth Engine.
+The layer control is organized by AOI.
+
+Each AOI contains:
+
+- NDVI 2016
+- NDVI 2019
+- NDVI 2022
+- NDVI 2025
+- Mangrove Mask 2016
+- Mangrove Mask 2019
+- Mangrove Mask 2022
+- Mangrove Mask 2025
+
+The layer-control panel can be scrolled using both:
+
+- the vertical scrollbar
+- the mouse wheel while the pointer is inside the panel
+
+Mouse-wheel scrolling inside the panel does not zoom the map.
 
 ## 🌐 Deployment
 
