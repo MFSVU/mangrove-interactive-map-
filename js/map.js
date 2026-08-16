@@ -65,26 +65,29 @@ var AOI_LAYER =
 
 
 // ============================================================
-// YEAR/AOI-SPECIFIC RASTER GROUPS
-// ============================================================
-//
-// One NDVI group and one mask group for each:
-//
-// AOI × Year
-//
-// Example:
-//
-// ndvi_AOI_001_2016
-// mask_AOI_001_2016
-//
-// ndvi_AOI_002_2016
-// mask_AOI_002_2016
-//
-// etc.
+// RASTER GROUPS
 // ============================================================
 
 var YEAR_GROUPS = {};
 
+
+// ============================================================
+// CREATE AOI-SPECIFIC GROUPS
+// ============================================================
+//
+// Each AOI gets its own group:
+//
+// AOI_001
+//   ├── NDVI 2016
+//   ├── NDVI 2019
+//   ├── NDVI 2022
+//   ├── NDVI 2025
+//   ├── Mangrove Mask 2016
+//   ├── Mangrove Mask 2019
+//   ├── Mangrove Mask 2022
+//   └── Mangrove Mask 2025
+//
+// ============================================================
 
 AOI_NAMES.forEach(
     function(aoiName) {
@@ -117,106 +120,103 @@ AOI_NAMES.forEach(
 
 
 // ============================================================
-// OVERLAY LAYERS
+// GROUPED OVERLAY LAYERS
 // ============================================================
 
-var overlayLayers = {
+var groupedOverlays = {};
 
-    "AOI Boundaries":
+
+// ============================================================
+// AOI BOUNDARY
+// ============================================================
+
+groupedOverlays[
+    "AOI Boundaries"
+] = {
+
+    "All AOI Boundaries":
         AOI_LAYER
 
 };
 
 
 // ============================================================
-// ADD NDVI LAYERS
-// ============================================================
-//
-// NDVI layers are organized by AOI and year.
-//
-// Example:
-// AOI_001 — NDVI 2016
-// AOI_001 — NDVI 2019
-// ...
-// AOI_002 — NDVI 2016
-// ...
+// CREATE AOI GROUPS
 // ============================================================
 
 AOI_NAMES.forEach(
     function(aoiName) {
 
+        var aoiGroup = {};
+
+
+        // ----------------------------------------------------
+        // NDVI
+        // ----------------------------------------------------
+
         YEARS.forEach(
             function(year) {
 
-                overlayLayers[
-
-                    aoiName +
-                    " — NDVI " +
-                    year
-
+                aoiGroup[
+                    "NDVI " + year
                 ] =
 
                     YEAR_GROUPS[
-
                         "ndvi_" +
                         aoiName +
                         "_" +
                         year
-
                     ];
 
             }
         );
 
-    }
-);
 
-
-// ============================================================
-// ADD MANGROVE MASK LAYERS
-// ============================================================
-
-AOI_NAMES.forEach(
-    function(aoiName) {
+        // ----------------------------------------------------
+        // Mangrove Masks
+        // ----------------------------------------------------
 
         YEARS.forEach(
             function(year) {
 
-                overlayLayers[
-
-                    aoiName +
-                    " — Mangrove Mask " +
-                    year
-
+                aoiGroup[
+                    "Mangrove Mask " + year
                 ] =
 
                     YEAR_GROUPS[
-
                         "mask_" +
                         aoiName +
                         "_" +
                         year
-
                     ];
 
             }
         );
+
+
+        // ----------------------------------------------------
+        // Add AOI group
+        // ----------------------------------------------------
+
+        groupedOverlays[
+            aoiName
+        ] = aoiGroup;
 
     }
 );
 
 
 // ============================================================
-// LAYER CONTROL
+// GROUPED LAYER CONTROL
 // ============================================================
 
 var layerControl =
 
-    L.control.layers(
+    L.control.groupedLayers(
 
         baseLayers,
 
-        overlayLayers,
+        groupedOverlays,
 
         {
 
@@ -224,7 +224,10 @@ var layerControl =
                 false,
 
             position:
-                "topright"
+                "topright",
+
+            groupCheckboxes:
+                false
 
         }
 
