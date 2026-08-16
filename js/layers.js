@@ -8,39 +8,41 @@
 // ============================================================
 
 console.log(
-    "Checking raster libraries..."
+    'Checking raster libraries...'
 );
 
 
 if (
-    typeof parseGeoraster !== "undefined"
+    typeof parseGeoraster !==
+    'undefined'
 ) {
 
     console.log(
-        "✅ GeoRaster loaded"
+        '✅ GeoRaster loaded'
     );
 
 } else {
 
     console.error(
-        "❌ GeoRaster not loaded"
+        '❌ GeoRaster not loaded'
     );
 
 }
 
 
 if (
-    typeof GeoRasterLayer !== "undefined"
+    typeof GeoRasterLayer !==
+    'undefined'
 ) {
 
     console.log(
-        "✅ GeoRasterLayer loaded"
+        '✅ GeoRasterLayer loaded'
     );
 
 } else {
 
     console.error(
-        "❌ GeoRasterLayer not loaded"
+        '❌ GeoRasterLayer not loaded'
     );
 
 }
@@ -53,11 +55,7 @@ if (
 function hexToRgb(hex) {
 
     hex =
-        hex.replace(
-            "#",
-            ""
-        );
-
+        hex.replace('#', '');
 
     return {
 
@@ -100,14 +98,12 @@ function interpolateColor(
     var c2 =
         hexToRgb(color2);
 
-
     var r =
         Math.round(
             c1.r +
             factor *
             (c2.r - c1.r)
         );
-
 
     var g =
         Math.round(
@@ -116,7 +112,6 @@ function interpolateColor(
             (c2.g - c1.g)
         );
 
-
     var b =
         Math.round(
             c1.b +
@@ -124,15 +119,12 @@ function interpolateColor(
             (c2.b - c1.b)
         );
 
-
     return (
-        "rgb(" +
-        r +
-        "," +
-        g +
-        "," +
+        'rgb(' +
+        r + ',' +
+        g + ',' +
         b +
-        ")"
+        ')'
     );
 
 }
@@ -143,18 +135,14 @@ function interpolateColor(
 // ============================================================
 //
 // NDVI:
+// -1 → 0  = RED
+//  0 → 1  = GREEN
 //
-// -1.0 -> RED
-//  0.0 -> WHITE
-// +1.0 -> GREEN
+// Zero is approximately white/light transition.
 //
 // ============================================================
 
 function ndviColor(value) {
-
-    // --------------------------------------------------------
-    // NoData
-    // --------------------------------------------------------
 
     if (
         value === null ||
@@ -168,10 +156,6 @@ function ndviColor(value) {
     }
 
 
-    // --------------------------------------------------------
-    // NDVI limits
-    // --------------------------------------------------------
-
     var min =
         NDVI_MIN;
 
@@ -179,98 +163,69 @@ function ndviColor(value) {
         NDVI_MAX;
 
 
-    // --------------------------------------------------------
-    // Clamp values
-    // --------------------------------------------------------
+    // Below -1
 
-    if (value < min) {
+    if (value <= min) {
 
-        value =
-            min;
+        return NDVI_PALETTE.colors[0];
 
     }
 
 
-    if (value > max) {
+    // Above 1
 
-        value =
-            max;
+    if (value >= max) {
+
+        return NDVI_PALETTE.colors[
+            NDVI_PALETTE.colors.length - 1
+        ];
 
     }
 
 
-    // --------------------------------------------------------
     // Normalize
-    // --------------------------------------------------------
 
     var normalized =
         (value - min) /
         (max - min);
 
 
-    var colors =
-        NDVI_PALETTE.colors;
-
-
     var scaled =
         normalized *
-        (colors.length - 1);
+        (NDVI_PALETTE.colors.length - 1);
 
 
     var index =
-        Math.floor(
-            scaled
-        );
+        Math.floor(scaled);
 
 
     var fraction =
-        scaled -
-        index;
+        scaled - index;
 
-
-    // --------------------------------------------------------
-    // Maximum value
-    // --------------------------------------------------------
 
     if (
         index >=
-        colors.length - 1
+        NDVI_PALETTE.colors.length - 1
     ) {
 
-        return colors[
-            colors.length - 1
+        return NDVI_PALETTE.colors[
+            NDVI_PALETTE.colors.length - 1
         ];
 
     }
 
 
-    // --------------------------------------------------------
-    // Interpolate
-    // --------------------------------------------------------
-
     return interpolateColor(
 
-        colors[index],
+        NDVI_PALETTE.colors[index],
 
-        colors[index + 1],
+        NDVI_PALETTE.colors[
+            index + 1
+        ],
 
         fraction
 
     );
-
-}
-
-
-// ============================================================
-// GET AOI COLOR
-// ============================================================
-
-function getAoiColor(index) {
-
-    return AOI_COLORS[
-        index %
-        AOI_COLORS.length
-    ];
 
 }
 
@@ -282,7 +237,7 @@ function getAoiColor(index) {
 function loadAOIs() {
 
     console.log(
-        "Loading AOIs:",
+        'Loading AOIs:',
         DATA_PATHS.aois
     );
 
@@ -296,22 +251,21 @@ function loadAOIs() {
             if (!response.ok) {
 
                 throw new Error(
-                    "AOI HTTP error: " +
+                    'AOI HTTP error: ' +
                     response.status
                 );
 
             }
 
-
             return response.json();
 
         })
 
-
         .then(function(data) {
 
             console.log(
-                "AOI GeoJSON loaded"
+                'AOI data loaded:',
+                data
             );
 
 
@@ -321,7 +275,7 @@ function loadAOIs() {
             ) {
 
                 console.warn(
-                    "No AOI features found"
+                    'No AOI features found'
                 );
 
                 return;
@@ -329,14 +283,8 @@ function loadAOIs() {
             }
 
 
-            console.log(
-                "Number of AOIs in GeoJSON:",
-                data.features.length
-            );
-
-
             // ------------------------------------------------
-            // CREATE AOI LAYER
+            // Create GeoJSON layer
             // ------------------------------------------------
 
             var aoiLayer =
@@ -346,71 +294,13 @@ function loadAOIs() {
 
                     {
 
-                        // ------------------------------------
-                        // AOI style
-                        // ------------------------------------
-
                         style:
                             function(feature) {
 
-                                var props =
-                                    feature.properties ||
-                                    {};
-
-
-                                var name =
-                                    props.name ||
-                                    props.id ||
-                                    "AOI";
-
-
-                                var index =
-                                    AOI_NAMES.indexOf(
-                                        name
-                                    );
-
-
-                                if (
-                                    index < 0
-                                ) {
-
-                                    index =
-                                        0;
-
-                                }
-
-
-                                var color =
-                                    getAoiColor(
-                                        index
-                                    );
-
-
-                                return {
-
-                                    color:
-                                        color,
-
-                                    weight:
-                                        AOI_STYLE.weight,
-
-                                    opacity:
-                                        AOI_STYLE.opacity,
-
-                                    fillColor:
-                                        color,
-
-                                    fillOpacity:
-                                        AOI_STYLE.fillOpacity
-
-                                };
+                                return AOI_STYLE;
 
                             },
 
-
-                        // ------------------------------------
-                        // AOI interaction
-                        // ------------------------------------
 
                         onEachFeature:
                             function(
@@ -422,55 +312,46 @@ function loadAOIs() {
                                     feature.properties ||
                                     {};
 
-
                                 var name =
                                     props.name ||
                                     props.id ||
-                                    "AOI";
-
-
-                                var area =
-                                    props.area_ha;
-
-
-                                var ndvi =
-                                    props.mean_ndvi;
+                                    'AOI';
 
 
                                 var html =
-                                    "<strong>📍 " +
+                                    '<strong>📍 ' +
                                     name +
-                                    "</strong>";
+                                    '</strong>';
 
 
                                 if (
-                                    area !==
-                                        undefined &&
-                                    area !==
-                                        null
+                                    props.area_ha !==
+                                    undefined &&
+                                    props.area_ha !==
+                                    null
                                 ) {
 
                                     html +=
-                                        "<br>Area: " +
+                                        '<br>Area: ' +
                                         Number(
-                                            area
+                                            props.area_ha
                                         ).toFixed(2) +
-                                        " ha";
+                                        ' ha';
 
                                 }
 
 
                                 if (
-                                    ndvi !==
-                                        undefined &&
-                                    ndvi !==
-                                        null
+                                    props.mean_ndvi !==
+                                    undefined &&
+                                    props.mean_ndvi !==
+                                    null
                                 ) {
 
                                     html +=
-                                        "<br>Mean NDVI: " +
+                                        '<br>Mean NDVI: ' +
                                         Number(
-                                            ndvi
+                                            props.mean_ndvi
                                         ).toFixed(3);
 
                                 }
@@ -481,12 +362,8 @@ function loadAOIs() {
                                 );
 
 
-                                // ----------------------------
-                                // Mouse over
-                                // ----------------------------
-
                                 layer.on(
-                                    "mouseover",
+                                    'mouseover',
                                     function() {
 
                                         this.setStyle({
@@ -499,50 +376,17 @@ function loadAOIs() {
 
                                         });
 
-
                                         this.bringToFront();
 
                                     }
                                 );
 
 
-                                // ----------------------------
-                                // Mouse out
-                                // ----------------------------
-
                                 layer.on(
-                                    "mouseout",
+                                    'mouseout',
                                     function() {
 
-                                        var index =
-                                            AOI_NAMES.indexOf(
-                                                name
-                                            );
-
-
-                                        if (
-                                            index < 0
-                                        ) {
-
-                                            index =
-                                                0;
-
-                                        }
-
-
-                                        var color =
-                                            getAoiColor(
-                                                index
-                                            );
-
-
                                         this.setStyle({
-
-                                            color:
-                                                color,
-
-                                            fillColor:
-                                                color,
 
                                             fillOpacity:
                                                 AOI_STYLE.fillOpacity,
@@ -563,11 +407,10 @@ function loadAOIs() {
 
 
             // ------------------------------------------------
-            // ADD AOI LAYER
+            // Add AOIs to map
             // ------------------------------------------------
 
             AOI_LAYER.clearLayers();
-
 
             AOI_LAYER.addLayer(
                 aoiLayer
@@ -575,7 +418,7 @@ function loadAOIs() {
 
 
             // ------------------------------------------------
-            // FIT MAP TO AOIs
+            // Fit map
             // ------------------------------------------------
 
             var bounds =
@@ -591,10 +434,8 @@ function loadAOIs() {
                     bounds,
 
                     {
-
                         padding:
                             [40, 40]
-
                     }
 
                 );
@@ -607,16 +448,15 @@ function loadAOIs() {
 
 
             console.log(
-                "✅ All AOIs loaded"
+                '✅ AOIs loaded'
             );
 
         })
 
-
         .catch(function(error) {
 
             console.error(
-                "❌ AOI loading error:",
+                '❌ AOI loading error:',
                 error
             );
 
@@ -628,19 +468,6 @@ function loadAOIs() {
 // ============================================================
 // GENERIC GEOTIFF LOADER
 // ============================================================
-//
-// IMPORTANT:
-// zIndex is explicitly specified here.
-//
-// NDVI:
-//   zIndex = 200
-//
-// Mangrove mask:
-//   zIndex = 300
-//
-// Both therefore appear above the basemap, including
-// ESRI Satellite.
-// ============================================================
 
 function loadGeoTIFF(
     url,
@@ -648,33 +475,29 @@ function loadGeoTIFF(
 ) {
 
     console.log(
-        "Loading GeoTIFF:",
+        'Loading GeoTIFF:',
         url
     );
 
 
-    return fetch(
-        url
-    )
+    return fetch(url)
 
         .then(function(response) {
 
             if (!response.ok) {
 
                 throw new Error(
-                    "GeoTIFF HTTP error " +
+                    'GeoTIFF HTTP error ' +
                     response.status +
-                    ": " +
+                    ': ' +
                     url
                 );
 
             }
 
-
             return response.arrayBuffer();
 
         })
-
 
         .then(function(arrayBuffer) {
 
@@ -684,18 +507,7 @@ function loadGeoTIFF(
 
         })
 
-
         .then(function(georaster) {
-
-            console.log(
-                "GeoTIFF parsed:",
-                url
-            );
-
-
-            // ------------------------------------------------
-            // CREATE GEORASTER LAYER
-            // ------------------------------------------------
 
             var layer =
                 new GeoRasterLayer({
@@ -703,43 +515,20 @@ function loadGeoTIFF(
                     georaster:
                         georaster,
 
+                    // ----------------------------------------
+                    // 100% opacity
+                    // ----------------------------------------
+
                     opacity:
-                        options.opacity ||
-                        0.8,
+                        options.opacity,
 
                     resolution:
-                        options.resolution ||
                         RASTER_OPTIONS.resolution,
 
                     pixelValuesToColorFn:
-                        options.pixelValuesToColorFn,
-
-                    zIndex:
-                        options.zIndex ||
-                        100
+                        options.pixelValuesToColorFn
 
                 });
-
-
-            // ------------------------------------------------
-            // EXPLICITLY SET Z-INDEX
-            // ------------------------------------------------
-            //
-            // This is important when switching between
-            // OpenStreetMap and ESRI Satellite.
-            // ------------------------------------------------
-
-            if (
-                typeof layer.setZIndex ===
-                "function"
-            ) {
-
-                layer.setZIndex(
-                    options.zIndex ||
-                    100
-                );
-
-            }
 
 
             return layer;
@@ -750,110 +539,37 @@ function loadGeoTIFF(
 
 
 // ============================================================
-// CREATE NDVI PATH
-// ============================================================
-
-function getNDVIPath(
-    aoiName,
-    year
-) {
-
-    return (
-
-        DATA_PATHS.ndviFolder +
-
-        aoiName +
-
-        "_ndvi_" +
-
-        year +
-
-        ".tif"
-
-    );
-
-}
-
-
-// ============================================================
-// CREATE MASK PATH
-// ============================================================
-
-function getMaskPath(
-    aoiName,
-    year
-) {
-
-    return (
-
-        DATA_PATHS.maskFolder +
-
-        aoiName +
-
-        "_mask_" +
-
-        year +
-
-        ".tif"
-
-    );
-
-}
-
-
-// ============================================================
 // LOAD NDVI LAYER
-// ============================================================
-//
-// There is ONLY ONE NDVI raster per AOI/year.
-//
-// Example:
-//
-// data/ndvi_rasters/AOI_001_ndvi_2016.tif
-//
-// Raw NDVI is NOT used.
 // ============================================================
 
 function loadNDVILayer(
-    aoiName,
+    aoi,
     year
 ) {
 
     var path =
-        getNDVIPath(
-            aoiName,
-            year
-        );
-
-
-    var groupKey =
-        "ndvi_" +
-        aoiName +
-        "_" +
-        year;
+        DATA_PATHS
+            .ndvi[aoi][year];
 
 
     var group =
-        YEAR_GROUPS[
-            groupKey
-        ];
+        AOI_GROUPS
+            [aoi]
+            .ndvi[year];
 
 
-    if (!group) {
+    if (!path) {
 
         console.warn(
-            "NDVI layer group not found:",
-            groupKey
+            'No NDVI path:',
+            aoi,
+            year
         );
 
         return;
 
     }
 
-
-    // --------------------------------------------------------
-    // Prevent duplicate loading
-    // --------------------------------------------------------
 
     if (
         group._rasterLoaded
@@ -868,44 +584,23 @@ function loadNDVILayer(
         true;
 
 
-    // --------------------------------------------------------
-    // LOAD NDVI GEOTIFF
-    // --------------------------------------------------------
-
     loadGeoTIFF(
 
         path,
 
         {
 
-            // ----------------------------------------------
-            // NDVI opacity
-            // ----------------------------------------------
+            // --------------------------------------------
+            // 100% opacity
+            // --------------------------------------------
 
             opacity:
-                RASTER_OPTIONS.ndviOpacity,
+                1.0,
 
 
-            // ----------------------------------------------
-            // Raster resolution
-            // ----------------------------------------------
-
-            resolution:
-                RASTER_OPTIONS.resolution,
-
-
-            // ----------------------------------------------
-            // IMPORTANT:
-            // NDVI is placed above the basemap.
-            // ----------------------------------------------
-
-            zIndex:
-                200,
-
-
-            // ----------------------------------------------
-            // NDVI color rendering
-            // ----------------------------------------------
+            // --------------------------------------------
+            // NDVI rendering
+            // --------------------------------------------
 
             pixelValuesToColorFn:
                 function(values) {
@@ -922,47 +617,27 @@ function loadNDVILayer(
 
         .then(function(layer) {
 
-            // ----------------------------------------------
-            // Add raster to group
-            // ----------------------------------------------
-
             group.addLayer(
                 layer
             );
 
 
-            // ----------------------------------------------
-            // Explicitly bring raster above basemap
-            // ----------------------------------------------
-
-            if (
-                typeof layer.bringToFront ===
-                "function"
-            ) {
-
-                layer.bringToFront();
-
-            }
-
-
             console.log(
-                "✅ NDVI loaded:",
-                aoiName,
+                '✅ NDVI loaded:',
+                aoi,
                 year
             );
 
         })
-
 
         .catch(function(error) {
 
             group._rasterLoaded =
                 false;
 
-
             console.error(
-                "❌ NDVI loading failed:",
-                aoiName,
+                '❌ NDVI loading failed:',
+                aoi,
                 year,
                 error
             );
@@ -975,55 +650,35 @@ function loadNDVILayer(
 // ============================================================
 // LOAD MANGROVE MASK
 // ============================================================
-//
-// Mangrove masks are binary:
-//
-// 0 = No mangrove
-// 1 = Mangrove
-//
-// Only pixels with value > 0 are displayed.
-// ============================================================
 
 function loadMaskLayer(
-    aoiName,
+    aoi,
     year
 ) {
 
     var path =
-        getMaskPath(
-            aoiName,
-            year
-        );
-
-
-    var groupKey =
-        "mask_" +
-        aoiName +
-        "_" +
-        year;
+        DATA_PATHS
+            .masks[aoi][year];
 
 
     var group =
-        YEAR_GROUPS[
-            groupKey
-        ];
+        AOI_GROUPS
+            [aoi]
+            .mask[year];
 
 
-    if (!group) {
+    if (!path) {
 
         console.warn(
-            "Mask layer group not found:",
-            groupKey
+            'No mask path:',
+            aoi,
+            year
         );
 
         return;
 
     }
 
-
-    // --------------------------------------------------------
-    // Prevent duplicate loading
-    // --------------------------------------------------------
 
     if (
         group._rasterLoaded
@@ -1038,43 +693,23 @@ function loadMaskLayer(
         true;
 
 
-    // --------------------------------------------------------
-    // LOAD MASK
-    // --------------------------------------------------------
-
     loadGeoTIFF(
 
         path,
 
         {
 
-            // ----------------------------------------------
-            // Mask opacity
-            // ----------------------------------------------
+            // --------------------------------------------
+            // 100% opacity
+            // --------------------------------------------
 
             opacity:
-                RASTER_OPTIONS.maskOpacity,
+                1.0,
 
 
-            // ----------------------------------------------
-            // Raster resolution
-            // ----------------------------------------------
-
-            resolution:
-                RASTER_OPTIONS.resolution,
-
-
-            // ----------------------------------------------
-            // Mask above NDVI
-            // ----------------------------------------------
-
-            zIndex:
-                300,
-
-
-            // ----------------------------------------------
+            // --------------------------------------------
             // Mask color
-            // ----------------------------------------------
+            // --------------------------------------------
 
             pixelValuesToColorFn:
                 function(values) {
@@ -1083,7 +718,6 @@ function loadMaskLayer(
                         values[0];
 
 
-                    // NoData / background
                     if (
                         value === null ||
                         value === undefined ||
@@ -1106,47 +740,27 @@ function loadMaskLayer(
 
         .then(function(layer) {
 
-            // ----------------------------------------------
-            // Add mask
-            // ----------------------------------------------
-
             group.addLayer(
                 layer
             );
 
 
-            // ----------------------------------------------
-            // Bring mask above NDVI
-            // ----------------------------------------------
-
-            if (
-                typeof layer.bringToFront ===
-                "function"
-            ) {
-
-                layer.bringToFront();
-
-            }
-
-
             console.log(
-                "✅ Mask loaded:",
-                aoiName,
+                '✅ Mask loaded:',
+                aoi,
                 year
             );
 
         })
-
 
         .catch(function(error) {
 
             group._rasterLoaded =
                 false;
 
-
             console.error(
-                "❌ Mask loading failed:",
-                aoiName,
+                '❌ Mask loading failed:',
+                aoi,
                 year,
                 error
             );
@@ -1157,45 +771,132 @@ function loadMaskLayer(
 
 
 // ============================================================
-// INITIALIZE RASTER LAYERS
-// ============================================================
-//
-// IMPORTANT:
-//
-// We DO NOT load all GeoTIFFs here.
-//
-// With 28 AOIs:
-//
-// 28 × 4 NDVI
-// 28 × 4 Masks
-//
-// = 224 possible raster files.
-//
-// Loading them all at startup would be unnecessarily heavy.
-//
-// Instead, they are loaded when the user activates the
-// corresponding layer in the layer control.
+// LOAD ALL RASTERS
 // ============================================================
 
 function initializeRasterLayers() {
 
-    console.log(
-        "Raster layers available for:",
-        AOI_NAMES.length,
-        "AOIs"
+    AOI_NAMES.forEach(
+        function(aoi) {
+
+            YEARS.forEach(
+                function(year) {
+
+                    loadNDVILayer(
+                        aoi,
+                        year
+                    );
+
+                    loadMaskLayer(
+                        aoi,
+                        year
+                    );
+
+                }
+            );
+
+        }
     );
 
-
-    console.log(
-        "Raster loading mode: on-demand"
-    );
+}
 
 
-    console.log(
-        "NDVI range:",
-        NDVI_MIN,
-        "to",
-        NDVI_MAX
+// ============================================================
+// AOI GROUP CONTROL
+// ============================================================
+//
+// Clicking:
+//
+// AOI_001 — All layers
+//
+// activates/deactivates all NDVI + Mask layers
+// belonging to AOI_001.
+//
+// ============================================================
+
+function setAOIGroupVisibility(
+    aoi,
+    visible
+) {
+
+    var group =
+        AOI_GROUPS[aoi];
+
+
+    if (!group) {
+
+        return;
+
+    }
+
+
+    YEARS.forEach(
+        function(year) {
+
+            var ndviGroup =
+                group.ndvi[year];
+
+            var maskGroup =
+                group.mask[year];
+
+
+            if (visible) {
+
+                if (
+                    !map.hasLayer(
+                        ndviGroup
+                    )
+                ) {
+
+                    map.addLayer(
+                        ndviGroup
+                    );
+
+                }
+
+
+                if (
+                    !map.hasLayer(
+                        maskGroup
+                    )
+                ) {
+
+                    map.addLayer(
+                        maskGroup
+                    );
+
+                }
+
+            } else {
+
+                if (
+                    map.hasLayer(
+                        ndviGroup
+                    )
+                ) {
+
+                    map.removeLayer(
+                        ndviGroup
+                    );
+
+                }
+
+
+                if (
+                    map.hasLayer(
+                        maskGroup
+                    )
+                ) {
+
+                    map.removeLayer(
+                        maskGroup
+                    );
+
+                }
+
+            }
+
+        }
     );
 
 }
@@ -1206,42 +907,47 @@ function initializeRasterLayers() {
 // ============================================================
 
 map.on(
-    "overlayadd",
+    'overlayadd',
     function(event) {
 
         AOI_NAMES.forEach(
-            function(aoiName) {
+            function(aoi) {
+
+                var group =
+                    AOI_GROUPS[aoi];
+
+
+                // --------------------------------------------
+                // AOI "ALL LAYERS"
+                // --------------------------------------------
+
+                if (
+                    event.layer ===
+                    group.all
+                ) {
+
+                    setAOIGroupVisibility(
+                        aoi,
+                        true
+                    );
+
+                }
+
+
+                // --------------------------------------------
+                // NDVI
+                // --------------------------------------------
 
                 YEARS.forEach(
                     function(year) {
 
-                        var ndviKey =
-                            "ndvi_" +
-                            aoiName +
-                            "_" +
-                            year;
-
-
-                        var maskKey =
-                            "mask_" +
-                            aoiName +
-                            "_" +
-                            year;
-
-
-                        // ------------------------------------
-                        // NDVI
-                        // ------------------------------------
-
                         if (
                             event.layer ===
-                            YEAR_GROUPS[
-                                ndviKey
-                            ]
+                            group.ndvi[year]
                         ) {
 
                             loadNDVILayer(
-                                aoiName,
+                                aoi,
                                 year
                             );
 
@@ -1249,18 +955,16 @@ map.on(
 
 
                         // ------------------------------------
-                        // Mask
+                        // MASK
                         // ------------------------------------
 
                         if (
                             event.layer ===
-                            YEAR_GROUPS[
-                                maskKey
-                            ]
+                            group.mask[year]
                         ) {
 
                             loadMaskLayer(
-                                aoiName,
+                                aoi,
                                 year
                             );
 
@@ -1268,6 +972,36 @@ map.on(
 
                     }
                 );
+
+            }
+        );
+
+    }
+);
+
+
+map.on(
+    'overlayremove',
+    function(event) {
+
+        AOI_NAMES.forEach(
+            function(aoi) {
+
+                var group =
+                    AOI_GROUPS[aoi];
+
+
+                if (
+                    event.layer ===
+                    group.all
+                ) {
+
+                    setAOIGroupVisibility(
+                        aoi,
+                        false
+                    );
+
+                }
 
             }
         );
@@ -1291,11 +1025,11 @@ function initializeLayers() {
 
 if (
     document.readyState ===
-    "loading"
+    'loading'
 ) {
 
     document.addEventListener(
-        "DOMContentLoaded",
+        'DOMContentLoaded',
         initializeLayers
     );
 
@@ -1307,5 +1041,5 @@ if (
 
 
 console.log(
-    "🗺️ Layers module loaded"
+    '🗺️ Layers module loaded'
 );
