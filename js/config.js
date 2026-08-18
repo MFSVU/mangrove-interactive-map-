@@ -126,10 +126,10 @@ const BASEMAPS = {
 const NDVI_PALETTE = {
 
     min:
-        -1.0,
+        -0.60,
 
     max:
-        1.0,
+        0.60,
 
     colors: [
 
