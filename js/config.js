@@ -110,14 +110,14 @@ const BASEMAPS = {
 //
 // NDVI:
 //
-// -1.0 ---------------- 0 ---------------- +1.0
+// -0.50 ---------------- 0 ---------------- +0.50
 //  RED                 WHITE              GREEN
 //
 // Negative NDVI:
-//   -1.0 to 0.0 = red grades
+//   -0.50 to 0.00 = red grades
 //
 // Positive NDVI:
-//    0.0 to +1.0 = green grades
+//    0.0 to +0.50 = green grades
 //
 // The GeoTIFF remains a numerical NDVI raster.
 // These colors are ONLY for web visualization.
@@ -126,10 +126,10 @@ const BASEMAPS = {
 const NDVI_PALETTE = {
 
     min:
-        -0.60,
+        -0.50,
 
     max:
-        0.60,
+        0.50,
 
     colors: [
 
@@ -228,10 +228,10 @@ const AOI_STYLE = {
 // ============================================================
 
 const NDVI_MIN =
-    -1.0;
+    -0.50;
 
 const NDVI_MAX =
-    1.0;
+    0.50;
 
 
 // ============================================================
@@ -239,7 +239,7 @@ const NDVI_MAX =
 // ============================================================
 
 const MASK_OPACITY =
-    0.60;
+    0.80;
 
 const MASK_COLOR =
     "rgba(0, 255, 0, 0.7)";
