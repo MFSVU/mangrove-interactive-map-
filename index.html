@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangrove Monitoring - Egypt's Red Sea Coast</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="map"></div>
+    
+    <!-- Legend -->
+    <div id="legend">
+        <h4>🌿 Mangrove Health (NDVI)</h4>
+        <div><span style="background:#d73027;"></span> -0.6 – -0.4</div>
+        <div><span style="background:#f46d43;"></span> -0.4 – -0.2</div>
+        <div><span style="background:#fdae61;"></span> -0.2 – 0.0</div>
+        <div><span style="background:#fee08b;"></span> 0.0 – 0.2</div>
+        <div><span style="background:#d9ef8b;"></span> 0.2 – 0.4</div>
+        <div><span style="background:#a6d96a;"></span> 0.4 – 0.6</div>
+        <hr style="margin: 8px 0;">
+        <div><span style="background:#00FF00; opacity:0.6;"></span> Mangrove Mask</div>
+        <div><span style="background:#FF4444; opacity:0.1; border:2px solid #FF4444;"></span> AOI Boundary</div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BUTTON PANEL - Upper Left -->
+    <!-- ========================================== -->
+
+    <div id="buttonPanel">
+        <button id="btnStudyArea" class="map-button">📷 Study Area</button>
+        <button id="btnNDVI" class="map-button">📈 NDVI Trajectories</button>
+        <button id="btnMask" class="map-button">🗺️ Mask Trajectories</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL OVERLAYS (Hidden by default) -->
+    <!-- ========================================== -->
+
+    <!-- Study Area Modal -->
+    <div id="modalStudyArea" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeStudyArea">&times;</span>
+            <img src="data/images/study_area.jpg" alt="Study Area" class="modal-image">
+        </div>
+    </div>
+
+    <!-- NDVI Trajectories Modal -->
+    <div id="modalNDVI" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeNDVI">&times;</span>
+            <img src="data/images/ndvi_trajectories.jpg" alt="NDVI Trajectories" class="modal-image">
+        </div>
+    </div>
+
+    <!-- Mask Trajectories Modal -->
+    <div id="modalMask" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeMask">&times;</span>
+            <img src="data/images/mask_trajectories.jpg" alt="Mask Trajectories" class="modal-image">
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- LEAFET AND PLUGINS -->
+    <!-- ============================================ -->
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- ============================================ -->
+    <!-- YOUR APPLICATION SCRIPTS -->
+    <!-- ============================================ -->
+    
+    <script src="js/config.js"></script>
+    <script src="js/layers.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>
