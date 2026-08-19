@@ -427,32 +427,3 @@ document.addEventListener('keydown', function(event) {
 console.log('✅ Image buttons initialized');
 
 
-
-
-// ============================================================
-// DOUBLE-CLICK ZOOM FOR AOI LAYERS
-// ============================================================
-
-// When creating AOI layers, add dblclick event
-function addAOIZoom(layer, aoiKey) {
-    layer.on('dblclick', function() {
-        try {
-            var bounds = layer.getBounds();
-            if (bounds && bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [50, 50] });
-                console.log('📍 Zooming to:', aoiKey);
-            }
-        } catch(e) {
-            console.warn('Could not zoom to:', aoiKey);
-        }
-    });
-}
-
-// Call this when creating AOI layers
-// Example: In your AOI loading function
-aoiKeys.forEach(function(aoiKey, index) {
-    // ... existing code ...
-    // After creating the layer, add:
-    addAOIZoom(aoiLayer, aoiKey);
-});
-
