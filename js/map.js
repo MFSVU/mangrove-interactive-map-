@@ -353,3 +353,75 @@ console.log(
 console.log(
     "✅ Layer-control mouse-wheel scrolling enabled"
 );
+
+
+
+
+
+
+// ============================================================
+// MODAL CONTROLS - Open Images
+// ============================================================
+
+// Get elements
+var btnStudyArea = document.getElementById('btnStudyArea');
+var btnNDVI = document.getElementById('btnNDVI');
+var btnMask = document.getElementById('btnMask');
+
+var modalStudyArea = document.getElementById('modalStudyArea');
+var modalNDVI = document.getElementById('modalNDVI');
+var modalMask = document.getElementById('modalMask');
+
+var closeStudyArea = document.getElementById('closeStudyArea');
+var closeNDVI = document.getElementById('closeNDVI');
+var closeMask = document.getElementById('closeMask');
+
+// Open modals
+btnStudyArea.addEventListener('click', function() {
+    modalStudyArea.classList.add('show');
+});
+
+btnNDVI.addEventListener('click', function() {
+    modalNDVI.classList.add('show');
+});
+
+btnMask.addEventListener('click', function() {
+    modalMask.classList.add('show');
+});
+
+// Close modals (X button)
+closeStudyArea.addEventListener('click', function() {
+    modalStudyArea.classList.remove('show');
+});
+
+closeNDVI.addEventListener('click', function() {
+    modalNDVI.classList.remove('show');
+});
+
+closeMask.addEventListener('click', function() {
+    modalMask.classList.remove('show');
+});
+
+// Close modals by clicking outside the image
+window.addEventListener('click', function(event) {
+    if (event.target === modalStudyArea) {
+        modalStudyArea.classList.remove('show');
+    }
+    if (event.target === modalNDVI) {
+        modalNDVI.classList.remove('show');
+    }
+    if (event.target === modalMask) {
+        modalMask.classList.remove('show');
+    }
+});
+
+// Close modals with ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        modalStudyArea.classList.remove('show');
+        modalNDVI.classList.remove('show');
+        modalMask.classList.remove('show');
+    }
+});
+
+console.log('✅ Image buttons initialized');
