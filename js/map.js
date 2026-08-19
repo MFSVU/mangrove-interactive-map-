@@ -70,7 +70,95 @@ console.log('🌿 Mangrove Interactive Map initialized');
 console.log('Years:', YEARS);
 
 // ============================================================
-// ZOOM-TO-AOI FUNCTIONALITY - FIXED
+// MODAL CONTROLS - Open Images
+// ============================================================
+
+// Get elements
+var btnStudyArea = document.getElementById('btnStudyArea');
+var btnNDVI = document.getElementById('btnNDVI');
+var btnMask = document.getElementById('btnMask');
+
+var modalStudyArea = document.getElementById('modalStudyArea');
+var modalNDVI = document.getElementById('modalNDVI');
+var modalMask = document.getElementById('modalMask');
+
+var closeStudyArea = document.getElementById('closeStudyArea');
+var closeNDVI = document.getElementById('closeNDVI');
+var closeMask = document.getElementById('closeMask');
+
+// Function to toggle modal
+function toggleModal(modal, show) {
+    if (show) {
+        modal.classList.add('show');
+    } else {
+        modal.classList.remove('show');
+    }
+}
+
+// Open modals with error checking
+if (btnStudyArea && modalStudyArea) {
+    btnStudyArea.addEventListener('click', function() {
+        toggleModal(modalStudyArea, true);
+    });
+}
+
+if (btnNDVI && modalNDVI) {
+    btnNDVI.addEventListener('click', function() {
+        toggleModal(modalNDVI, true);
+    });
+}
+
+if (btnMask && modalMask) {
+    btnMask.addEventListener('click', function() {
+        toggleModal(modalMask, true);
+    });
+}
+
+// Close modals with X button
+if (closeStudyArea && modalStudyArea) {
+    closeStudyArea.addEventListener('click', function() {
+        toggleModal(modalStudyArea, false);
+    });
+}
+
+if (closeNDVI && modalNDVI) {
+    closeNDVI.addEventListener('click', function() {
+        toggleModal(modalNDVI, false);
+    });
+}
+
+if (closeMask && modalMask) {
+    closeMask.addEventListener('click', function() {
+        toggleModal(modalMask, false);
+    });
+}
+
+// Close modals by clicking outside
+window.addEventListener('click', function(event) {
+    if (event.target === modalStudyArea) {
+        toggleModal(modalStudyArea, false);
+    }
+    if (event.target === modalNDVI) {
+        toggleModal(modalNDVI, false);
+    }
+    if (event.target === modalMask) {
+        toggleModal(modalMask, false);
+    }
+});
+
+// Close modals with ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        toggleModal(modalStudyArea, false);
+        toggleModal(modalNDVI, false);
+        toggleModal(modalMask, false);
+    }
+});
+
+console.log('✅ Image buttons initialized');
+
+// ============================================================
+// ZOOM-TO-AOI FUNCTIONALITY
 // ============================================================
 
 // Function to zoom to an AOI
@@ -119,25 +207,18 @@ function createAOIZoomPanel() {
     }
     
     function buildPanel() {
-        var panel = L.DomUtil.create('div', 'aoi-zoom-panel');
-        panel.style.position = 'absolute';
-        panel.style.top = '10px';
-        panel.style.right = '10px';
-        panel.style.background = 'white';
-        panel.style.padding = '10px';
-        panel.style.borderRadius = '8px';
-        panel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-        panel.style.zIndex = '1000';
-        panel.style.maxHeight = '300px';
-        panel.style.overflowY = 'auto';
-        panel.style.minWidth = '120px';
-        panel.style.fontSize = '12px';
+        // Remove panel if already exists
+        var existingPanel = document.querySelector('.aoi-zoom-panel');
+        if (existingPanel) {
+            existingPanel.remove();
+        }
+        
+        var panel = document.createElement('div');
+        panel.className = 'aoi-zoom-panel';
         
         var title = document.createElement('div');
-        title.innerHTML = '<strong>📍 Zoom to AOI</strong>';
-        title.style.marginBottom = '6px';
-        title.style.borderBottom = '1px solid #ddd';
-        title.style.paddingBottom = '4px';
+        title.className = 'panel-title';
+        title.textContent = '📍 Zoom to AOI';
         panel.appendChild(title);
         
         // Sort AOI keys for consistent order
@@ -146,16 +227,6 @@ function createAOIZoomPanel() {
         sortedKeys.forEach(function(aoiKey) {
             var btn = document.createElement('button');
             btn.textContent = aoiKey;
-            btn.style.display = 'block';
-            btn.style.width = '100%';
-            btn.style.padding = '4px 8px';
-            btn.style.margin = '2px 0';
-            btn.style.border = '1px solid #ccc';
-            btn.style.borderRadius = '4px';
-            btn.style.background = '#f8f9fa';
-            btn.style.cursor = 'pointer';
-            btn.style.fontSize = '11px';
-            btn.style.transition = 'background 0.2s';
             
             btn.onclick = function() {
                 zoomToAOI(aoiKey);
@@ -173,12 +244,6 @@ function createAOIZoomPanel() {
             
             panel.appendChild(btn);
         });
-        
-        // Remove panel if already exists
-        var existingPanel = document.querySelector('.aoi-zoom-panel');
-        if (existingPanel) {
-            existingPanel.remove();
-        }
         
         map.getContainer().appendChild(panel);
         console.log('✅ AOI zoom panel created with', window.aoiKeys.length, 'AOIs');
@@ -201,7 +266,7 @@ map.on('overlayadd', function(event) {
 });
 
 // ============================================================
-// ZOOM ON AOI LAYER ACTIVATION (Optional)
+// ZOOM ON AOI LAYER ACTIVATION
 // ============================================================
 
 // When an AOI layer is checked, zoom to it
