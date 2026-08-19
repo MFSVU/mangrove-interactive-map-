@@ -1,31 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mangrove Monitoring - Egypt's Red Sea Coast</title>
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <link rel="stylesheet" href="css/style.css">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Mangrove Monitoring - Egypt's Red Sea Coast
+    </title>
+
+
+    <!-- ================================================= -->
+    <!-- LEAFLET CSS -->
+    <!-- ================================================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <!-- ================================================= -->
+    <!-- GROUPED LAYER CONTROL CSS -->
+    <!-- ================================================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet-groupedlayercontrol@0.6.1/dist/leaflet.groupedlayercontrol.min.css"
+    >
+
+
+    <!-- ================================================= -->
+    <!-- PROJECT CSS -->
+    <!-- ================================================= -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
 </head>
+
+
 <body>
+
     <div id="map"></div>
-    
-    <!-- Legend -->
+
+
+    <!-- ================================================= -->
+    <!-- NDVI LEGEND -->
+    <!-- ================================================= -->
+
     <div id="legend">
-        <h4>🌿 Mangrove Health (NDVI)</h4>
-        <div><span style="background:#d73027;"></span> -0.6 – -0.4</div>
-        <div><span style="background:#f46d43;"></span> -0.4 – -0.2</div>
-        <div><span style="background:#fdae61;"></span> -0.2 – 0.0</div>
-        <div><span style="background:#fee08b;"></span> 0.0 – 0.2</div>
-        <div><span style="background:#d9ef8b;"></span> 0.2 – 0.4</div>
-        <div><span style="background:#a6d96a;"></span> 0.4 – 0.6</div>
-        <hr style="margin: 8px 0;">
-        <div><span style="background:#00FF00; opacity:0.6;"></span> Mangrove Mask</div>
-        <div><span style="background:#FF4444; opacity:0.1; border:2px solid #FF4444;"></span> AOI Boundary</div>
+
+        <h4>
+            🌿 Mangrove Health (NDVI)
+        </h4>
+
+
+        <div>
+            <span
+                style="background:#67001f;"
+            ></span>
+
+            -0.50 – -0.40
+        </div>
+
+
+        <div>
+            <span
+                style="background:#b2182b;"
+            ></span>
+
+            -0.40 – -0.30
+        </div>
+
+
+        <div>
+            <span
+                style="background:#d6604d;"
+            ></span>
+
+            -0.30 – -0.20
+        </div>
+
+
+        <div>
+            <span
+                style="background:#f4a582;"
+            ></span>
+
+            -0.20 – -0.10
+        </div>
+
+
+        <div>
+            <span
+                style="background:#fddbc7;"
+            ></span>
+
+            -0.10 – 0.00
+        </div>
+
+
+        <div>
+            <span
+                style="
+                    background:#ffffff;
+                    border:1px solid #999;
+                "
+            ></span>
+
+            0.00
+        </div>
+
+
+        <div>
+            <span
+                style="background:#d9f0d3;"
+            ></span>
+
+            0.00 – 0.10
+        </div>
+
+
+        <div>
+            <span
+                style="background:#a6dba0;"
+            ></span>
+
+            0.10 – 0.20
+        </div>
+
+
+        <div>
+            <span
+                style="background:#5aae61;"
+            ></span>
+
+            0.20 – 0.30
+        </div>
+
+
+        <div>
+            <span
+                style="background:#1b7837;"
+            ></span>
+
+            0.30 – 0.40
+        </div>
+
+
+        <div>
+            <span
+                style="background:#00441b;"
+            ></span>
+
+            0.40 – 0.50
+        </div>
+
+
+        <hr>
+
+
+        <div>
+
+            <span
+                style="
+                    background:#00FF00;
+                    opacity:0.6;
+                "
+            ></span>
+
+            Mangrove Mask
+
+        </div>
+
+
+        <div>
+
+            <span
+                style="
+                    background:#FF4444;
+                    opacity:0.1;
+                    border:2px solid #FF4444;
+                "
+            ></span>
+
+            AOI Boundary
+
+        </div>
+
     </div>
+
 
     <!-- ========================================== -->
     <!-- BUTTON PANEL - Upper Left -->
@@ -53,7 +225,7 @@
     <div id="modalNDVI" class="modal">
         <div class="modal-content">
             <span class="close-btn" id="closeNDVI">&times;</span>
-            <img src="data/images/ndvi_trajectories.jpg" alt="NDVI Trajectories" class="modal-image">
+            <img src="data/images/ndvi_trajectories.png" alt="NDVI Trajectories" class="modal-image">
         </div>
     </div>
 
@@ -61,23 +233,57 @@
     <div id="modalMask" class="modal">
         <div class="modal-content">
             <span class="close-btn" id="closeMask">&times;</span>
-            <img src="data/images/mask_trajectories.jpg" alt="Mask Trajectories" class="modal-image">
+            <img src="data/images/mask_trajectories.png" alt="Mask Trajectories" class="modal-image">
         </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- LEAFET AND PLUGINS -->
-    <!-- ============================================ -->
-    
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- ============================================ -->
-    <!-- YOUR APPLICATION SCRIPTS -->
-    <!-- ============================================ -->
-    
+
+    <!-- ================================================= -->
+    <!-- LEAFLET -->
+    <!-- ================================================= -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- GEORASTER -->
+    <!-- ================================================= -->
+
+    <script
+        src="https://unpkg.com/georaster">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- GEORASTER LAYER -->
+    <!-- ================================================= -->
+
+    <script
+        src="https://unpkg.com/georaster-layer-for-leaflet/georaster-layer-for-leaflet.browserify.min.js">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- GROUPED LAYER CONTROL -->
+    <!-- ================================================= -->
+
+    <script
+        src="https://unpkg.com/leaflet-groupedlayercontrol@0.6.1/dist/leaflet.groupedlayercontrol.min.js">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- APPLICATION -->
+    <!-- ================================================= -->
+
     <script src="js/config.js"></script>
-    <script src="js/layers.js"></script>
+
     <script src="js/map.js"></script>
+
+    <script src="js/layers.js"></script>
+
 </body>
+
 </html>
